@@ -5,6 +5,12 @@ const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
 
+const CLOCK_SPEED = 500;
+const ns_per_us = 1000;
+const ns_per_ms = 1000 * ns_per_us;
+const ns_per_s = 1000 * ns_per_ms;
+const SLEEP_TIME = ns_per_s / CLOCK_SPEED;
+
 pub fn main() !void {
     const path = try arguments.file_path_from_args();
 
@@ -13,8 +19,6 @@ pub fn main() !void {
 
     const display = try display_core.Display.new();
     defer display.quit();
-
-    const slow_factor = 0.2;
 
     var quit = false;
     while (!quit) {
@@ -26,7 +30,7 @@ pub fn main() !void {
             display.render(&cpu.vram);
         }
 
-        std.time.sleep(12 * 1000 * 1000 * slow_factor);
+        std.time.sleep(SLEEP_TIME);
     }
 }
 
