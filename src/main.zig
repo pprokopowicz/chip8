@@ -1,49 +1,44 @@
 const cpu_core = @import("cpu-core");
+const display_core = @import("display");
 const std = @import("std");
+const arguments = @import("arguments.zig");
 const log = std.log;
 
 pub fn main() !void {
-    // setup graphics
-    // setup inputs
-
-    const path = try file_path_from_args();
+    const path = try arguments.file_path_from_args();
 
     var chip8 = cpu_core.Chip8.new();
     try chip8.load(path);
 
-    while (true) {
+    const display = try display_core.Display.new();
+    defer display.quit();
+
+    const slow_factor = 0.5;
+
+    var quit = false;
+    while (!quit) {
         chip8.emulate_cycle();
 
+        parse_event(display, &quit);
+
         if (chip8.should_draw) {
-            debug_render(chip8);
+            display.render(&chip8.vram);
         }
+
+        std.time.sleep(12 * 1000 * 1000 * slow_factor);
     }
 }
 
-const ArgumentError = error{
-    TooManyArguments,
-    NotEnoughArguments,
-};
+fn parse_event(display: display_core.Display, quit: *bool) void {
+    var event: display_core.DisplayEvent = display_core.DisplayEvent.none;
+    display.parse_event(&event);
 
-fn file_path_from_args() ![]u8 {
-    const args = std.os.argv;
-
-    log.info("There are {d} args:", .{args.len});
-    for (args) |arg| {
-        log.info("  {s}", .{arg});
+    switch (event) {
+        .quit => quit.* = true,
+        .key_down => |key_code| log.info("Key down: {}", .{key_code}),
+        .key_up => |key_code| log.info("Key up {}", .{key_code}),
+        .none => {},
     }
-
-    if (args.len < 2) {
-        log.err("Not enough arguments passed!", .{});
-        return ArgumentError.NotEnoughArguments;
-    } else if (args.len > 2) {
-        log.err("Too many arguments passed!", .{});
-        return ArgumentError.TooManyArguments;
-    }
-
-    const file_path = std.mem.span(args[1]);
-
-    return file_path;
 }
 
 fn debug_render(cpu: cpu_core.Chip8) void {
