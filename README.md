@@ -12,4 +12,4 @@ foo@bar:~$ zig build run -- <PATH_TO_ROM>
 
 ## Notes
 
-Currently only works on macOS.
+Currently only works on macOS and Linux.
