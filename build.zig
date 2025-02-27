@@ -1,6 +1,10 @@
 const std = @import("std");
 
-pub fn build(b: *std.Build) void {
+const BuildError = error{
+    UnavailablePlatform,
+};
+
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
@@ -26,16 +30,25 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    display.addFrameworkPath(b.path("lib/SDL3/macOS"));
-    display.addLibraryPath(b.path("lib/SDL3/macOS"));
-    display.linkFramework("SDL3", .{ .needed = true });
-
     const exe = b.addExecutable(.{
         .name = "chip8",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
+
+    switch (target.result.os.tag) {
+        .macos => {
+            display.addFrameworkPath(b.path("lib/SDL3/macOS"));
+            display.addLibraryPath(b.path("lib/SDL3/macOS"));
+            display.linkFramework("SDL3", .{ .needed = true });
+        },
+        .linux => {
+            display.linkSystemLibrary("SDL3", .{ .needed = true });
+            exe.linkLibC();
+        },
+        else => return BuildError.UnavailablePlatform,
+    }
 
     cpu_core.addImport(cartridge_name, cartridge);
     exe.root_module.addImport(cpu_core_name, cpu_core);
