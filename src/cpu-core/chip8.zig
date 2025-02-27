@@ -5,9 +5,9 @@ const font_set = @import("font.zig").font_set;
 const opcode = @import("opcode_execution.zig");
 const log = std.log;
 
-const memory_size = 4096;
-const register_size = 16;
-const stack_size = 16;
+const MEMORY_SIZE = 4096;
+const REGISTER_SIZE = 16;
+const STACK_SIZE = 16;
 const KEYPAD_SIZE = constant.KEYPAD_SIZE;
 const DISPLAY_HEIGHT = constant.INTERNAL_DISPLAY_HEIGHT;
 const DISPLAY_WIDTH = constant.INTERNAL_DISPLAY_WIDTH;
@@ -15,9 +15,9 @@ const VRAM_SIZE = constant.VRAM_SIZE;
 
 pub const Chip8 = struct {
     opcode: u16,
-    memory: [memory_size]u8,
-    registers: [register_size]u8,
-    stack: [stack_size]u16,
+    memory: [MEMORY_SIZE]u8,
+    registers: [REGISTER_SIZE]u8,
+    stack: [STACK_SIZE]u16,
     vram: [VRAM_SIZE]u1,
     keypad: [KEYPAD_SIZE]u1,
     index_register: u16,
@@ -32,9 +32,9 @@ pub const Chip8 = struct {
 
         return Chip8{
             .opcode = 0,
-            .memory = font_set ++ std.mem.zeroes([memory_size - font_set.len]u8),
-            .registers = std.mem.zeroes([register_size]u8),
-            .stack = std.mem.zeroes([stack_size]u16),
+            .memory = font_set ++ std.mem.zeroes([MEMORY_SIZE - font_set.len]u8),
+            .registers = std.mem.zeroes([REGISTER_SIZE]u8),
+            .stack = std.mem.zeroes([STACK_SIZE]u16),
             .vram = std.mem.zeroes([VRAM_SIZE]u1),
             .keypad = std.mem.zeroes([KEYPAD_SIZE]u1),
             .index_register = 0,
