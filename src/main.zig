@@ -10,6 +10,8 @@ const NS_PER_US = 1000;
 const NS_PER_MS = 1000 * NS_PER_US;
 const NS_PER_S = 1000 * NS_PER_MS;
 const SLEEP_TIME = NS_PER_S / CLOCK_SPEED;
+const DISPLAY_REFRESH_RATE = 60;
+const DRAW_TIME_DIFF = NS_PER_S / DISPLAY_REFRESH_RATE;
 
 pub fn main() !void {
     const path = try arguments.file_path_from_args();
@@ -20,14 +22,19 @@ pub fn main() !void {
     const display = try display_core.Display.new();
     defer display.quit();
 
+    var draw_timestamp = std.time.nanoTimestamp();
+
     var quit = false;
     while (!quit) {
         cpu.emulate_cycle();
 
         parse_event(display, &cpu.keypad, &quit);
 
-        if (cpu.should_draw) {
+        const next_draw_timestamp = std.time.nanoTimestamp();
+
+        if (cpu.should_draw and (next_draw_timestamp - draw_timestamp) >= DRAW_TIME_DIFF) {
             display.render(&cpu.vram);
+            draw_timestamp = next_draw_timestamp;
         }
 
         std.time.sleep(SLEEP_TIME);
