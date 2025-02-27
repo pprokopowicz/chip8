@@ -7,15 +7,20 @@ const log = std.log;
 
 pub fn parse_key_down(key_code: u32, keypad: *[16]u1) void {
     const index = index_from_key_code(key_code);
-    keypad[index] = 1;
+    if (index != null) {
+        keypad[index.?] = 1;
+    }
 }
 
 pub fn parse_key_up(key_code: u32, keypad: *[16]u1) void {
     const index = index_from_key_code(key_code);
-    keypad[index] = 0;
+
+    if (index != null) {
+        keypad[index.?] = 0;
+    }
 }
 
-fn index_from_key_code(key_code: u32) usize {
+fn index_from_key_code(key_code: u32) ?usize {
     const c_key_code: c_int = @intCast(key_code);
 
     return switch (c_key_code) {
@@ -35,6 +40,6 @@ fn index_from_key_code(key_code: u32) usize {
         sdl.SDL_SCANCODE_R => 13,
         sdl.SDL_SCANCODE_F => 14,
         sdl.SDL_SCANCODE_V => 15,
-        else => 0,
+        else => null,
     };
 }
