@@ -223,10 +223,12 @@ pub fn op_dxyn(cpu: *Chip8) void {
 
         for (masks, 0..masks.len) |mask, x_line| {
             if ((pixel & mask) != 0) {
-                if (cpu.vram[(vx + x_line + ((vy + y_line) * 64))] == 1) {
+                const index = (vx + x_line + ((vy + y_line) * 64)) % 2048;
+
+                if (cpu.vram[index] == 1) {
                     cpu.registers[0xF] = 1;
                 }
-                cpu.vram[vx + x_line + ((vy + y_line) * 64)] ^= 1;
+                cpu.vram[index] ^= 1;
             }
         }
     }
