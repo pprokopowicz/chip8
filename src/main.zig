@@ -1,5 +1,6 @@
 const cpu_core = @import("cpu-core");
 const display_core = @import("display");
+const keypad_core = @import("keypad");
 const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
@@ -7,8 +8,8 @@ const log = std.log;
 pub fn main() !void {
     const path = try arguments.file_path_from_args();
 
-    var chip8 = cpu_core.Chip8.new();
-    try chip8.load(path);
+    var cpu = cpu_core.Chip8.new();
+    try cpu.load(path);
 
     const display = try display_core.Display.new();
     defer display.quit();
@@ -17,26 +18,26 @@ pub fn main() !void {
 
     var quit = false;
     while (!quit) {
-        chip8.emulate_cycle();
+        cpu.emulate_cycle();
 
-        parse_event(display, &quit);
+        parse_event(display, &cpu.keypad, &quit);
 
-        if (chip8.should_draw) {
-            display.render(&chip8.vram);
+        if (cpu.should_draw) {
+            display.render(&cpu.vram);
         }
 
         std.time.sleep(12 * 1000 * 1000 * slow_factor);
     }
 }
 
-fn parse_event(display: display_core.Display, quit: *bool) void {
+fn parse_event(display: display_core.Display, keypad: *[16]u1, quit: *bool) void {
     var event: display_core.DisplayEvent = display_core.DisplayEvent.none;
     display.parse_event(&event);
 
     switch (event) {
         .quit => quit.* = true,
-        .key_down => |key_code| log.info("Key down: {}", .{key_code}),
-        .key_up => |key_code| log.info("Key up {}", .{key_code}),
+        .key_down => |key_code| keypad_core.parse_key_down(key_code, keypad),
+        .key_up => |key_code| keypad_core.parse_key_up(key_code, keypad),
         .none => {},
     }
 }
