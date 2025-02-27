@@ -3,16 +3,19 @@ const sdl = @cImport({
     @cInclude("SDL3/SDL_main.h");
 });
 const std = @import("std");
+const constant = @import("constant");
 const log = std.log;
 
-pub fn parse_key_down(key_code: u32, keypad: *[16]u1) void {
+const KEYPAD_SIZE = constant.KEYPAD_SIZE;
+
+pub fn parse_key_down(key_code: u32, keypad: *[KEYPAD_SIZE]u1) void {
     const index = index_from_key_code(key_code);
     if (index != null) {
         keypad[index.?] = 1;
     }
 }
 
-pub fn parse_key_up(key_code: u32, keypad: *[16]u1) void {
+pub fn parse_key_up(key_code: u32, keypad: *[KEYPAD_SIZE]u1) void {
     const index = index_from_key_code(key_code);
 
     if (index != null) {

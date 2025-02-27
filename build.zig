@@ -8,6 +8,7 @@ const BuildError = error{
     UnavailablePlatform,
 };
 
+const constant_name = "constant";
 const cpu_core_name = "cpu-core";
 const cartridge_name = "cartridge";
 const display_name = "display";
@@ -17,6 +18,7 @@ pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const constant = constant_module(b, target, optimize);
     const cpu_core = cpu_core_module(b, target, optimize);
     const cartridge = cartridge_module(b, target, optimize);
     const display = display_module(b, target, optimize);
@@ -26,7 +28,11 @@ pub fn build(b: *std.Build) !void {
     const link_modules = [_]*Module{display};
     try link_library(b, target, &link_modules, exe);
 
+    cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
+    display.addImport(constant_name, constant);
+    keypad.addImport(constant_name, constant);
+    exe.root_module.addImport(constant_name, constant);
     exe.root_module.addImport(cpu_core_name, cpu_core);
     exe.root_module.addImport(display_name, display);
     exe.root_module.addImport(keypad_name, keypad);
@@ -34,6 +40,14 @@ pub fn build(b: *std.Build) !void {
     b.installArtifact(exe);
 
     add_run_step(b, exe);
+}
+
+fn constant_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
+    return b.addModule(constant_name, .{
+        .root_source_file = b.path("src/constant/constant.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
 }
 
 fn cpu_core_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {

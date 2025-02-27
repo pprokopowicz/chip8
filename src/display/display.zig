@@ -2,14 +2,15 @@ const sdl = @cImport({
     @cInclude("SDL3/SDL.h");
     @cInclude("SDL3/SDL_main.h");
 });
+const constant = @import("constant");
 const std = @import("std");
 const log = std.log;
 
-const WINDOW_WIDTH = 1024;
-const WINDOW_HEIGHT = 512;
+const WINDOW_WIDTH = constant.DISPLAY_WIDTH;
+const WINDOW_HEIGHT = constant.DISPLAY_HEIGHT;
 const WINDOW_NAME = "Chip8";
-const TEXTURE_WIDTH = 64;
-const TEXTURE_HEIGHT = 32;
+const TEXTURE_WIDTH = constant.INTERNAL_DISPLAY_WIDTH;
+const TEXTURE_HEIGHT = constant.INTERNAL_DISPLAY_HEIGHT;
 
 const DisplayError = @import("display_error.zig").DisplayError;
 pub const DisplayEvent = @import("display_event.zig").DisplayEvent;
@@ -112,10 +113,14 @@ pub const Display = struct {
         _ = sdl.SDL_LockTexture(self.texture, null, @as([*c]?*anyopaque, @ptrCast(&pixels)), &pitch);
 
         var y: usize = 0;
-        while (y < 32) : (y += 1) {
+        while (y < TEXTURE_HEIGHT) : (y += 1) {
             var x: usize = 0;
-            while (x < 64) : (x += 1) {
-                pixels.?[y * 64 + x] = if (vram[y * 64 + x] == 1) 0xFFFFFFFF else 0x000000FF;
+            while (x < TEXTURE_WIDTH) : (x += 1) {
+                if (vram[y * TEXTURE_WIDTH + x] == 1) {
+                    pixels.?[y * TEXTURE_WIDTH + x] = 0xFFFFFFFF;
+                } else {
+                    pixels.?[y * TEXTURE_WIDTH + x] = 0x000000FF;
+                }
             }
         }
         sdl.SDL_UnlockTexture(self.texture);

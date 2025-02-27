@@ -1,5 +1,6 @@
 const std = @import("std");
 const cartridge = @import("cartridge");
+const constant = @import("constant");
 const font_set = @import("font.zig").font_set;
 const opcode = @import("opcode_execution.zig");
 const log = std.log;
@@ -7,18 +8,18 @@ const log = std.log;
 const memory_size = 4096;
 const register_size = 16;
 const stack_size = 16;
-const keypad_size = 16;
-const display_height = 32;
-const display_width = 64;
-const vram_size = display_height * display_width;
+const KEYPAD_SIZE = constant.KEYPAD_SIZE;
+const DISPLAY_HEIGHT = constant.INTERNAL_DISPLAY_HEIGHT;
+const DISPLAY_WIDTH = constant.INTERNAL_DISPLAY_WIDTH;
+const VRAM_SIZE = constant.VRAM_SIZE;
 
 pub const Chip8 = struct {
     opcode: u16,
     memory: [memory_size]u8,
     registers: [register_size]u8,
     stack: [stack_size]u16,
-    vram: [vram_size]u1,
-    keypad: [keypad_size]u1,
+    vram: [VRAM_SIZE]u1,
+    keypad: [KEYPAD_SIZE]u1,
     index_register: u16,
     program_counter: u16,
     stack_pointer: u16,
@@ -34,8 +35,8 @@ pub const Chip8 = struct {
             .memory = font_set ++ std.mem.zeroes([memory_size - font_set.len]u8),
             .registers = std.mem.zeroes([register_size]u8),
             .stack = std.mem.zeroes([stack_size]u16),
-            .vram = std.mem.zeroes([vram_size]u1),
-            .keypad = std.mem.zeroes([keypad_size]u1),
+            .vram = std.mem.zeroes([VRAM_SIZE]u1),
+            .keypad = std.mem.zeroes([KEYPAD_SIZE]u1),
             .index_register = 0,
             .program_counter = 0x200,
             .stack_pointer = 0,

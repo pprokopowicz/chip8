@@ -1,5 +1,10 @@
 const std = @import("std");
+const constant = @import("constant");
 const Chip8 = @import("chip8.zig").Chip8;
+
+const DISPLAY_HEIGHT = constant.INTERNAL_DISPLAY_HEIGHT;
+const DISPLAY_WIDTH = constant.INTERNAL_DISPLAY_WIDTH;
+const VRAM_SIZE = constant.VRAM_SIZE;
 
 pub fn op_00e0(cpu: *Chip8) void {
     cpu.should_draw = true;
@@ -213,8 +218,8 @@ pub fn op_cxnn(cpu: *Chip8) void {
 }
 
 pub fn op_dxyn(cpu: *Chip8) void {
-    const vx: u16 = @intCast(vx_value(cpu) % 64);
-    const vy: u16 = @intCast(vy_value(cpu) % 32);
+    const vx: u16 = @intCast(vx_value(cpu) % DISPLAY_WIDTH);
+    const vy: u16 = @intCast(vy_value(cpu) % DISPLAY_HEIGHT);
 
     const height = cpu.opcode & 0x000F;
     var pixel: u8 = undefined;
@@ -233,20 +238,20 @@ pub fn op_dxyn(cpu: *Chip8) void {
         width_loop: for (masks, 0..masks.len) |mask, x_line| {
             if ((pixel & mask) != 0) {
                 const x = vx + x_line;
-                const index = (x + (y * 64)) % 2048;
+                const index = (x + (y * 64)) % VRAM_SIZE;
 
                 if (cpu.vram[index] == 1) {
                     cpu.registers[0xF] = 1;
                 }
                 cpu.vram[index] ^= 1;
 
-                if (x == 64) {
+                if (x == DISPLAY_WIDTH) {
                     break :width_loop;
                 }
             }
         }
 
-        if (y == 32) {
+        if (y == DISPLAY_HEIGHT) {
             break :height_loop;
         }
     }

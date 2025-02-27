@@ -6,10 +6,10 @@ const arguments = @import("arguments.zig");
 const log = std.log;
 
 const CLOCK_SPEED = 500;
-const ns_per_us = 1000;
-const ns_per_ms = 1000 * ns_per_us;
-const ns_per_s = 1000 * ns_per_ms;
-const SLEEP_TIME = ns_per_s / CLOCK_SPEED;
+const NS_PER_US = 1000;
+const NS_PER_MS = 1000 * NS_PER_US;
+const NS_PER_S = 1000 * NS_PER_MS;
+const SLEEP_TIME = NS_PER_S / CLOCK_SPEED;
 
 pub fn main() !void {
     const path = try arguments.file_path_from_args();
