@@ -86,6 +86,7 @@ pub fn op_8xy1(cpu: *Chip8) void {
     const x = x_value(cpu);
     const vy = vy_value(cpu);
     cpu.registers[x] |= vy;
+    cpu.registers[0xF] = 0;
 
     next(cpu);
 }
@@ -94,6 +95,7 @@ pub fn op_8xy2(cpu: *Chip8) void {
     const x = x_value(cpu);
     const vy = vy_value(cpu);
     cpu.registers[x] &= vy;
+    cpu.registers[0xF] = 0;
 
     next(cpu);
 }
@@ -102,6 +104,7 @@ pub fn op_8xy3(cpu: *Chip8) void {
     const x = x_value(cpu);
     const vy = vy_value(cpu);
     cpu.registers[x] ^= vy;
+    cpu.registers[0xF] = 0;
 
     next(cpu);
 }
@@ -112,13 +115,13 @@ pub fn op_8xy4(cpu: *Chip8) void {
     const vy = vy_value(cpu);
     const sum = @addWithOverflow(vx, vy);
 
+    cpu.registers[x] = sum[0];
+
     if (sum[1] != 0) {
         cpu.registers[0xF] = 1;
     } else {
         cpu.registers[0xF] = 0;
     }
-
-    cpu.registers[x] = sum[0];
 
     next(cpu);
 }
@@ -129,23 +132,24 @@ pub fn op_8xy5(cpu: *Chip8) void {
     const vy = vy_value(cpu);
     const difference = @subWithOverflow(vx, vy);
 
+    cpu.registers[x] = difference[0];
+
     if (difference[1] != 0) {
         cpu.registers[0xF] = 0;
     } else {
         cpu.registers[0xF] = 1;
     }
 
-    cpu.registers[x] = difference[0];
-
     next(cpu);
 }
 
 pub fn op_8xy6(cpu: *Chip8) void {
     const x = x_value(cpu);
-    const vx = vx_value(cpu);
+    const vy = vy_value(cpu);
 
-    cpu.registers[0xF] = vx & 0x1;
+    cpu.registers[x] = vy;
     cpu.registers[x] >>= 1;
+    cpu.registers[0xF] = vy & 0x1;
 
     next(cpu);
 }
@@ -156,23 +160,25 @@ pub fn op_8xy7(cpu: *Chip8) void {
     const vy = vy_value(cpu);
     const difference = @subWithOverflow(vy, vx);
 
+    cpu.registers[x] = difference[0];
+
     if (difference[1] != 0) {
         cpu.registers[0xF] = 0;
     } else {
         cpu.registers[0xF] = 1;
     }
 
-    cpu.registers[x] = difference[0];
-
     next(cpu);
 }
 
 pub fn op_8xye(cpu: *Chip8) void {
     const x = x_value(cpu);
-    const vx = vx_value(cpu);
+    const vy = vy_value(cpu);
 
-    cpu.registers[0xF] = vx >> 7;
+    cpu.registers[x] = vy;
     cpu.registers[x] <<= 1;
+
+    cpu.registers[0xF] = vy >> 7;
 
     next(cpu);
 }
@@ -207,8 +213,9 @@ pub fn op_cxnn(cpu: *Chip8) void {
 }
 
 pub fn op_dxyn(cpu: *Chip8) void {
-    const vx: u16 = @intCast(vx_value(cpu));
-    const vy: u16 = @intCast(vy_value(cpu));
+    const vx: u16 = @intCast(vx_value(cpu) % 64);
+    const vy: u16 = @intCast(vy_value(cpu) % 32);
+
     const height = cpu.opcode & 0x000F;
     var pixel: u8 = undefined;
 
@@ -216,20 +223,31 @@ pub fn op_dxyn(cpu: *Chip8) void {
 
     var y_line: u16 = 0;
 
-    while (y_line < height) : (y_line += 1) {
+    height_loop: while (y_line < height) : (y_line += 1) {
         pixel = cpu.memory[cpu.index_register + y_line];
+
+        const y = y_line + vy;
 
         const masks = [_]u8{ 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
 
-        for (masks, 0..masks.len) |mask, x_line| {
+        width_loop: for (masks, 0..masks.len) |mask, x_line| {
             if ((pixel & mask) != 0) {
-                const index = (vx + x_line + ((vy + y_line) * 64)) % 2048;
+                const x = vx + x_line;
+                const index = (x + (y * 64)) % 2048;
 
                 if (cpu.vram[index] == 1) {
                     cpu.registers[0xF] = 1;
                 }
                 cpu.vram[index] ^= 1;
+
+                if (x == 64) {
+                    break :width_loop;
+                }
             }
+        }
+
+        if (y == 32) {
+            break :height_loop;
         }
     }
 

@@ -14,7 +14,7 @@ pub fn main() !void {
     const display = try display_core.Display.new();
     defer display.quit();
 
-    const slow_factor = 0.5;
+    const slow_factor = 0.2;
 
     var quit = false;
     while (!quit) {

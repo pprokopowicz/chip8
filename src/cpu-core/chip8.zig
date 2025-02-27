@@ -109,7 +109,7 @@ pub const Chip8 = struct {
                 switch (additional_value) {
                     0x0000 => opcode.op_00e0(self),
                     0x000E => opcode.op_00ee(self),
-                    else => self.log_unknown_opcode(),
+                    else => self.unknown_opcode(),
                 }
             },
             0x1000 => opcode.op_1nnn(self),
@@ -131,7 +131,7 @@ pub const Chip8 = struct {
                     0x0006 => opcode.op_8xy6(self),
                     0x0007 => opcode.op_8xy7(self),
                     0x000E => opcode.op_8xye(self),
-                    else => self.log_unknown_opcode(),
+                    else => self.unknown_opcode(),
                 }
             },
             0x9000 => opcode.op_9xy0(self),
@@ -144,7 +144,7 @@ pub const Chip8 = struct {
                 switch (additional_value) {
                     0x009E => opcode.op_ex9e(self),
                     0x00A1 => opcode.op_exa1(self),
-                    else => self.log_unknown_opcode(),
+                    else => self.unknown_opcode(),
                 }
             },
             0xF000 => {
@@ -159,14 +159,15 @@ pub const Chip8 = struct {
                     0x0033 => opcode.op_fx33(self),
                     0x0055 => opcode.op_fx55(self),
                     0x0065 => opcode.op_fx65(self),
-                    else => self.log_unknown_opcode(),
+                    else => self.unknown_opcode(),
                 }
             },
-            else => self.log_unknown_opcode(),
+            else => self.unknown_opcode(),
         }
     }
 
-    fn log_unknown_opcode(self: Chip8) void {
+    fn unknown_opcode(self: *Chip8) void {
         log.warn("Unknown opcode: 0x{X}!", .{self.opcode});
+        self.program_counter += 2;
     }
 };
