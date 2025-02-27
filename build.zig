@@ -11,6 +11,7 @@ const BuildError = error{
 const cpu_core_name = "cpu-core";
 const cartridge_name = "cartridge";
 const display_name = "display";
+const keypad_name = "keypad";
 
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
@@ -28,6 +29,7 @@ pub fn build(b: *std.Build) !void {
     cpu_core.addImport(cartridge_name, cartridge);
     exe.root_module.addImport(cpu_core_name, cpu_core);
     exe.root_module.addImport(display_name, display);
+    exe.root_module.addImport(keypad_name, keypad);
 
     b.installArtifact(exe);
 
@@ -58,6 +60,13 @@ fn display_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode)
     });
 }
 
+fn keypad_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
+    return b.addModule(keypad_name, .{
+        .root_source_file = b.path("src/keypad/keypad.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+}
 
 fn executable_compile(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Compile {
     return b.addExecutable(.{
