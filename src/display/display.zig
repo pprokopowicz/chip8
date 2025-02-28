@@ -33,6 +33,7 @@ pub const Display = struct {
         errdefer sdl.SDL_DestroyRenderer(renderer);
 
         const texture = try new_texture(renderer);
+        errdefer sdl.SDL_DestroyTexture(texture);
 
         log.info("New Display initialized!", .{});
 
@@ -90,6 +91,7 @@ pub const Display = struct {
     }
 
     pub fn quit(self: Display) void {
+        sdl.SDL_DestroyTexture(self.texture);
         sdl.SDL_DestroyRenderer(self.renderer);
         sdl.SDL_DestroyWindow(self.window);
         sdl.SDL_Quit();
@@ -142,9 +144,6 @@ pub const Display = struct {
                     }
                 },
                 sdl.SDL_EVENT_KEY_UP => {
-                    // const name = sdl.SDL_GetScancodeName(sdl_event.key.scancode);
-                    // std.debug.print("Up: {s}\n", .{name});
-
                     event.* = DisplayEvent{ .key_up = key_code(sdl_event) };
                 },
                 else => event.* = DisplayEvent.none,
