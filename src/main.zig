@@ -1,3 +1,4 @@
+const constant = @import("constant");
 const cpu_core = @import("cpu-core");
 const display_core = @import("display");
 const keypad_core = @import("keypad");
@@ -5,13 +6,8 @@ const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
 
-const CLOCK_SPEED = 500;
-const NS_PER_US = 1000;
-const NS_PER_MS = 1000 * NS_PER_US;
-const NS_PER_S = 1000 * NS_PER_MS;
-const SLEEP_TIME = NS_PER_S / CLOCK_SPEED;
-const DISPLAY_REFRESH_RATE = 60;
-const DRAW_TIME_DIFF = NS_PER_S / DISPLAY_REFRESH_RATE;
+const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
+const DRAW_TIME_DIFF = constant.NS_PER_S / constant.DISPLAY_REFRESH_RATE;
 
 pub fn main() !void {
     const path = try arguments.file_path_from_args();
@@ -41,7 +37,7 @@ pub fn main() !void {
     }
 }
 
-fn parse_event(display: display_core.Display, keypad: *[16]u1, quit: *bool) void {
+fn parse_event(display: display_core.Display, keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {
     var event: display_core.DisplayEvent = display_core.DisplayEvent.none;
     display.parse_event(&event);
 
@@ -56,10 +52,10 @@ fn parse_event(display: display_core.Display, keypad: *[16]u1, quit: *bool) void
 fn debug_render(cpu: cpu_core.Chip8) void {
     var y: usize = 0;
 
-    while (y < 32) : (y += 1) {
+    while (y < constant.INTERNAL_DISPLAY_HEIGHT) : (y += 1) {
         var x: usize = 0;
-        while (x < 64) : (x += 1) {
-            if (cpu.vram[y * 64 + x] == 0) {
+        while (x < constant.INTERNAL_DISPLAY_WIDTH) : (x += 1) {
+            if (cpu.vram[y * constant.INTERNAL_DISPLAY_WIDTH + x] == 0) {
                 std.debug.print(" ", .{});
             } else {
                 std.debug.print("#", .{});
