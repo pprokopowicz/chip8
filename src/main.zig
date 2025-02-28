@@ -2,6 +2,7 @@ const constant = @import("constant");
 const cpu_core = @import("cpu-core");
 const display_core = @import("display");
 const keypad_core = @import("keypad");
+const input_event = @import("input-event");
 const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
@@ -21,7 +22,7 @@ pub fn main() !void {
     while (!quit) {
         cpu.emulate_cycle();
 
-        parse_event(display, &cpu.keypad, &quit);
+        parse_event(&cpu.keypad, &quit);
 
         if (cpu.should_draw) {
             display.render(&cpu.vram);
@@ -31,9 +32,9 @@ pub fn main() !void {
     }
 }
 
-fn parse_event(display: display_core.Display, keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {
-    var event: display_core.DisplayEvent = display_core.DisplayEvent.none;
-    display.parse_event(&event);
+fn parse_event(keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {
+    var event: input_event.InputEvent = input_event.InputEvent.none;
+    input_event.parse_event(&event);
 
     switch (event) {
         .quit => quit.* = true,

@@ -13,7 +13,6 @@ const TEXTURE_WIDTH = constant.INTERNAL_DISPLAY_WIDTH;
 const TEXTURE_HEIGHT = constant.INTERNAL_DISPLAY_HEIGHT;
 
 const DisplayError = @import("display_error.zig").DisplayError;
-pub const DisplayEvent = @import("display_event.zig").DisplayEvent;
 
 pub const Display = struct {
     window: ?*sdl.struct_SDL_Window,
@@ -126,32 +125,5 @@ pub const Display = struct {
             }
         }
         sdl.SDL_UnlockTexture(self.texture);
-    }
-
-    pub fn parse_event(self: Display, event: *DisplayEvent) void {
-        _ = self;
-
-        var sdl_event: sdl.SDL_Event = undefined;
-
-        while (sdl.SDL_PollEvent(&sdl_event)) {
-            switch (sdl_event.type) {
-                sdl.SDL_EVENT_QUIT => event.* = DisplayEvent.quit,
-                sdl.SDL_EVENT_KEY_DOWN => {
-                    if (sdl_event.key.scancode == sdl.SDL_SCANCODE_ESCAPE) {
-                        event.* = DisplayEvent.quit;
-                    } else {
-                        event.* = DisplayEvent{ .key_down = key_code(sdl_event) };
-                    }
-                },
-                sdl.SDL_EVENT_KEY_UP => {
-                    event.* = DisplayEvent{ .key_up = key_code(sdl_event) };
-                },
-                else => event.* = DisplayEvent.none,
-            }
-        }
-    }
-
-    fn key_code(event: sdl.SDL_Event) u32 {
-        return @intCast(event.key.scancode);
     }
 };
