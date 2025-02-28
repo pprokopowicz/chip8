@@ -12,4 +12,7 @@ foo@bar:~$ zig build run -- <PATH_TO_ROM>
 
 ## Notes
 
-Currently only works on macOS and Linux.
+Prerequisite to running is having [SDL3](https://github.com/libsdl-org/SDL) installed. As far as I know Linux should have it out of the box, on macOS use homebrew to install.
+
+
+Currently tested on macOS and Linux.

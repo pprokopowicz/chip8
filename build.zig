@@ -28,7 +28,7 @@ pub fn build(b: *std.Build) !void {
     const exe = executable_compile(b, target, optimize);
 
     const link_modules = [_]*Module{ display, keypad, input_event };
-    try link_library(b, target, &link_modules, exe);
+    try link_sdl(&link_modules, exe);
 
     cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
@@ -102,23 +102,11 @@ fn executable_compile(b: *std.Build, target: ResolvedTarget, optimize: OptimizeM
     });
 }
 
-fn link_library(b: *std.Build, target: ResolvedTarget, modules: []const *Module, exe: *Compile) !void {
-    switch (target.result.os.tag) {
-        .macos => {
-            for (modules) |module| {
-                module.addFrameworkPath(b.path("lib/SDL3/macOS"));
-                module.addLibraryPath(b.path("lib/SDL3/macOS"));
-                module.linkFramework("SDL3", .{ .needed = true });
-            }
-        },
-        .linux => {
-            for (modules) |module| {
-                module.linkSystemLibrary("SDL3", .{ .needed = true });
-            }
-            exe.linkLibC();
-        },
-        else => return BuildError.UnavailablePlatform,
+fn link_sdl(modules: []const *Module, exe: *Compile) !void {
+    for (modules) |module| {
+        module.linkSystemLibrary("SDL3", .{ .needed = true });
     }
+    exe.linkLibC();
 }
 
 fn add_run_step(b: *std.Build, exe: *Compile) void {

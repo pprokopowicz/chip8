@@ -1,9 +1,15 @@
 const std = @import("std");
+const DisplayConfig = @import("display").DisplayConfig;
 const log = std.log;
 
 const ArgumentError = error{
     TooManyArguments,
     NotEnoughArguments,
+};
+
+pub const Config = struct {
+    file_path: []u8,
+    display_config: DisplayConfig,
 };
 
 pub fn file_path_from_args() ![]u8 {
