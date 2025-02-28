@@ -15,7 +15,12 @@ pub fn main() !void {
     var cpu = cpu_core.Chip8.new();
     try cpu.load(path);
 
-    const display = try display_core.Display.new();
+    const display_config = display_core.DisplayConfig.new(
+        constant.DEFAULT_DISPLAY_SCALE,
+        constant.DEFAULT_FOREGROUND_COLOR,
+        constant.DEFAULT_BACKGROUND_COLOR,
+    );
+    const display = try display_core.Display.new(display_config);
     defer display.quit();
 
     var quit = false;

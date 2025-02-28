@@ -6,26 +6,26 @@ const constant = @import("constant");
 const std = @import("std");
 const log = std.log;
 
-const WINDOW_WIDTH = constant.DISPLAY_WIDTH;
-const WINDOW_HEIGHT = constant.DISPLAY_HEIGHT;
 const WINDOW_NAME = "Chip8";
 const TEXTURE_WIDTH = constant.INTERNAL_DISPLAY_WIDTH;
 const TEXTURE_HEIGHT = constant.INTERNAL_DISPLAY_HEIGHT;
 
 const DisplayError = @import("display_error.zig").DisplayError;
+pub const DisplayConfig = @import("display_config.zig").DisplayConfig;
 
 pub const Display = struct {
+    config: DisplayConfig,
     window: ?*sdl.struct_SDL_Window,
     renderer: ?*sdl.struct_SDL_Renderer,
     texture: [*c]sdl.struct_SDL_Texture,
 
-    pub fn new() !Display {
+    pub fn new(config: DisplayConfig) !Display {
         sdl.SDL_SetMainReady();
 
         try initialize();
         errdefer sdl.SDL_Quit();
 
-        const window = try new_window();
+        const window = try new_window(config);
         errdefer sdl.SDL_DestroyWindow(window);
 
         const renderer = try new_renderer(window);
@@ -37,6 +37,7 @@ pub const Display = struct {
         log.info("New Display initialized!", .{});
 
         return Display{
+            .config = config,
             .window = window,
             .renderer = renderer,
             .texture = texture,
@@ -51,8 +52,10 @@ pub const Display = struct {
         }
     }
 
-    fn new_window() !?*sdl.struct_SDL_Window {
-        const window = sdl.SDL_CreateWindow(WINDOW_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    fn new_window(config: DisplayConfig) !?*sdl.struct_SDL_Window {
+        const width: c_int = @intCast(config.width);
+        const height: c_int = @intCast(config.height);
+        const window = sdl.SDL_CreateWindow(WINDOW_NAME, width, height, 0);
 
         if (window == null) {
             const err = sdl.SDL_GetError();
@@ -101,7 +104,9 @@ pub const Display = struct {
 
         self.buildTexture(vram);
 
-        var dest = sdl.SDL_FRect{ .x = 0, .y = 0, .w = WINDOW_WIDTH, .h = WINDOW_HEIGHT };
+        const width: f32 = @floatFromInt(self.config.width);
+        const height: f32 = @floatFromInt(self.config.height);
+        var dest = sdl.SDL_FRect{ .x = 0, .y = 0, .w = width, .h = height };
 
         _ = sdl.SDL_RenderTexture(self.renderer, self.texture, null, &dest);
         _ = sdl.SDL_RenderPresent(self.renderer);
@@ -118,9 +123,9 @@ pub const Display = struct {
             var x: usize = 0;
             while (x < TEXTURE_WIDTH) : (x += 1) {
                 if (vram[y * TEXTURE_WIDTH + x] == 1) {
-                    pixels.?[y * TEXTURE_WIDTH + x] = 0xFFFFFFFF;
+                    pixels.?[y * TEXTURE_WIDTH + x] = self.config.foreground_color;
                 } else {
-                    pixels.?[y * TEXTURE_WIDTH + x] = 0x000000FF;
+                    pixels.?[y * TEXTURE_WIDTH + x] = self.config.background_color;
                 }
             }
         }
