@@ -7,7 +7,6 @@ const arguments = @import("arguments.zig");
 const log = std.log;
 
 const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
-const DRAW_TIME_DIFF = constant.NS_PER_S / constant.DISPLAY_REFRESH_RATE;
 
 pub fn main() !void {
     const path = try arguments.file_path_from_args();
@@ -18,19 +17,14 @@ pub fn main() !void {
     const display = try display_core.Display.new();
     defer display.quit();
 
-    var draw_timestamp = std.time.nanoTimestamp();
-
     var quit = false;
     while (!quit) {
         cpu.emulate_cycle();
 
         parse_event(display, &cpu.keypad, &quit);
 
-        const next_draw_timestamp = std.time.nanoTimestamp();
-
-        if (cpu.should_draw and (next_draw_timestamp - draw_timestamp) >= DRAW_TIME_DIFF) {
+        if (cpu.should_draw) {
             display.render(&cpu.vram);
-            draw_timestamp = next_draw_timestamp;
         }
 
         std.time.sleep(SLEEP_TIME);
