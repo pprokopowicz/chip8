@@ -10,17 +10,12 @@ const log = std.log;
 const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
 
 pub fn main() !void {
-    const path = try arguments.file_path_from_args();
+    const config = try arguments.config();
 
     var cpu = cpu_core.Chip8.new();
-    try cpu.load(path);
+    try cpu.load(config.file_path);
 
-    const display_config = display_core.DisplayConfig.new(
-        constant.DEFAULT_DISPLAY_SCALE,
-        constant.DEFAULT_FOREGROUND_COLOR,
-        constant.DEFAULT_BACKGROUND_COLOR,
-    );
-    const display = try display_core.Display.new(display_config);
+    const display = try display_core.Display.new(config.display_config);
     defer display.quit();
 
     var quit = false;
