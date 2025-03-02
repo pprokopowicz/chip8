@@ -6,11 +6,20 @@ const input_event = @import("input-event");
 const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
+const Socket = @import("socket").Socket;
 
 const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
 
 pub fn main() !void {
     const config = try arguments.config();
+
+    var socket = try Socket.new(config.socket_config);
+    defer socket.close();
+
+    try socket.bind();
+
+    const response = try socket.receive(1024);
+    var address = response.address;
 
     var cpu = cpu_core.Chip8.new();
     try cpu.load(config.file_path);
@@ -25,11 +34,23 @@ pub fn main() !void {
         parse_event(&cpu.keypad, &quit);
 
         if (cpu.should_draw) {
+            const message = message_from_vram(cpu.vram);
+            _ = socket.send(&message, &address) catch 0;
             display.render(&cpu.vram);
         }
 
         std.time.sleep(SLEEP_TIME);
     }
+}
+
+fn message_from_vram(vram: [constant.VRAM_SIZE]u1) [constant.VRAM_SIZE]u8 {
+    var message: [constant.VRAM_SIZE]u8 = undefined;
+
+    for (vram, 0..vram.len) |value, index| {
+        message[index] = @intCast(value);
+    }
+
+    return message;
 }
 
 fn parse_event(keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {

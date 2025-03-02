@@ -1,6 +1,7 @@
 const std = @import("std");
 const constant = @import("constant");
 const DisplayConfig = @import("display").DisplayConfig;
+const SocketConfig = @import("socket").SocketConfig;
 const log = std.log;
 
 const ArgumentError = error{
@@ -12,11 +13,13 @@ const ArgumentError = error{
 pub const Config = struct {
     file_path: []u8,
     display_config: DisplayConfig,
+    socket_config: SocketConfig,
 
-    fn new(file_path: []u8, display_config: DisplayConfig) Config {
+    fn new(file_path: []u8, display_config: DisplayConfig, socket_config: SocketConfig) Config {
         return Config{
             .file_path = file_path,
             .display_config = display_config,
+            .socket_config = socket_config,
         };
     }
 };
@@ -25,6 +28,8 @@ const FILE_PATH_NAME = "--rom";
 const DISPLAY_SCALE_NAME = "--scale";
 const FOREGROUND_NAME = "--foreground-color";
 const BACKGROUND_NAME = "--background-color";
+const ADDRESS_NAME = "--address";
+const PORT_NAME = "--port";
 
 pub fn config() !Config {
     const args = std.os.argv;
@@ -38,6 +43,8 @@ pub fn config() !Config {
     const display_scale = try display_scale_argument(args);
     const foreground_color = try foreground_color_argument(args);
     const background_color = try background_color_argument(args);
+    // const address = try address_argument(args);
+    const port = try port_argument(args);
 
     const display_config = DisplayConfig.new(
         display_scale,
@@ -45,7 +52,9 @@ pub fn config() !Config {
         background_color,
     );
 
-    return Config.new(file_path, display_config);
+    const socket_config = SocketConfig.new("127.0.0.1", port);
+
+    return Config.new(file_path, display_config, socket_config);
 }
 
 fn file_path_argument(args: [][*:0]u8) ![]u8 {
@@ -91,6 +100,27 @@ fn background_color_argument(args: [][*:0]u8) !u32 {
     }
 }
 
+// fn address_argument(args: [][*:0]u8) ![]u8 {
+//     const address_arg = try named_argument(ADDRESS_NAME, args);
+
+//     if (address_arg) |address| {
+//         return std.mem.span(address);
+//     } else {
+//         return constant.DEFAULT_ADDRESS;
+//     }
+// }
+
+fn port_argument(args: [][*:0]u8) !u16 {
+    const port_arg = try named_argument(PORT_NAME, args);
+
+    if (port_arg) |port| {
+        const port_int = try int_from_string(u16, port, 10);
+        return port_int;
+    } else {
+        return constant.DEFAULT_PORT;
+    }
+}
+
 fn named_argument(name: []const u8, args: [][*:0]u8) !?[*:0]u8 {
     const value = for (args, 0..args.len) |argument, index| {
         const cast_argument = std.mem.span(argument);
@@ -114,6 +144,6 @@ fn add_alpha(color: u32) u32 {
 
 fn int_from_string(T: type, buf: [*:0]u8, base: u8) !T {
     const cast_buf = std.mem.span(buf);
-    const int_value = try std.fmt.parseInt(u32, cast_buf, base);
+    const int_value = try std.fmt.parseInt(T, cast_buf, base);
     return int_value;
 }
