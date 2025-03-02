@@ -43,7 +43,6 @@ pub fn config() !Config {
     const display_scale = try display_scale_argument(args);
     const foreground_color = try foreground_color_argument(args);
     const background_color = try background_color_argument(args);
-    // const address = try address_argument(args);
     const port = try port_argument(args);
 
     const display_config = DisplayConfig.new(
@@ -52,7 +51,7 @@ pub fn config() !Config {
         background_color,
     );
 
-    const socket_config = SocketConfig.new("127.0.0.1", port);
+    const socket_config = SocketConfig.new(constant.DEFAULT_ADDRESS, port);
 
     return Config.new(file_path, display_config, socket_config);
 }
@@ -99,16 +98,6 @@ fn background_color_argument(args: [][*:0]u8) !u32 {
         return constant.DEFAULT_BACKGROUND_COLOR;
     }
 }
-
-// fn address_argument(args: [][*:0]u8) ![]u8 {
-//     const address_arg = try named_argument(ADDRESS_NAME, args);
-
-//     if (address_arg) |address| {
-//         return std.mem.span(address);
-//     } else {
-//         return constant.DEFAULT_ADDRESS;
-//     }
-// }
 
 fn port_argument(args: [][*:0]u8) !u16 {
     const port_arg = try named_argument(PORT_NAME, args);

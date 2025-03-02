@@ -17,5 +17,5 @@ const NS_PER_US = 1000;
 const NS_PER_MS = 1000 * NS_PER_US;
 pub const NS_PER_S = 1000 * NS_PER_MS;
 
-pub const DEFAULT_ADDRESS = "127.0.0.1";
+pub const DEFAULT_ADDRESS = "0.0.0.0";
 pub const DEFAULT_PORT = 7890;
