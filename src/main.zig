@@ -53,6 +53,8 @@ fn game_loop(cpu: *cpu_core.Chip8, display: display_core.Display, audio: Audio) 
 
 fn game_loop_with_socket(cpu: *cpu_core.Chip8, display: display_core.Display, audio: Audio, socket_config: SocketConfig) !void {
     var socket = try Socket.new(socket_config);
+    defer socket.close();
+
     try socket.bind();
 
     const response = try socket.receive(1024);
