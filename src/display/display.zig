@@ -47,7 +47,7 @@ pub const Display = struct {
     fn initialize() !void {
         if (!sdl.SDL_Init(sdl.SDL_INIT_VIDEO)) {
             const err = sdl.SDL_GetError();
-            log.info("Failed to initialize with error: {s}", .{err});
+            log.info("Failed to initialize video with error: {s}", .{err});
             return DisplayError.FailedToInitialize;
         }
     }

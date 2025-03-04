@@ -6,6 +6,7 @@ const input_event = @import("input-event");
 const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
+const Audio = @import("audio").Audio;
 const Socket = @import("socket").Socket;
 const SocketConfig = @import("socket").SocketConfig;
 
@@ -17,17 +18,20 @@ pub fn main() !void {
     var cpu = cpu_core.Chip8.new();
     try cpu.load(config.file_path);
 
+    const audio = try Audio.new();
+    defer audio.quit();
+
     const display = try display_core.Display.new(config.display_config);
     defer display.quit();
 
     if (config.socket_config) |socket_config| {
-        try game_loop_with_socket(&cpu, display, socket_config);
+        try game_loop_with_socket(&cpu, display, audio, socket_config);
     } else {
-        game_loop(&cpu, display);
+        game_loop(&cpu, display, audio);
     }
 }
 
-fn game_loop(cpu: *cpu_core.Chip8, display: display_core.Display) void {
+fn game_loop(cpu: *cpu_core.Chip8, display: display_core.Display, audio: Audio) void {
     var quit = false;
 
     while (!quit) {
@@ -39,11 +43,15 @@ fn game_loop(cpu: *cpu_core.Chip8, display: display_core.Display) void {
             display.render(&cpu.vram);
         }
 
+        if (cpu.should_play_sound) {
+            audio.play();
+        }
+
         std.time.sleep(SLEEP_TIME);
     }
 }
 
-fn game_loop_with_socket(cpu: *cpu_core.Chip8, display: display_core.Display, socket_config: SocketConfig) !void {
+fn game_loop_with_socket(cpu: *cpu_core.Chip8, display: display_core.Display, audio: Audio, socket_config: SocketConfig) !void {
     var socket = try Socket.new(socket_config);
     try socket.bind();
 
@@ -61,6 +69,10 @@ fn game_loop_with_socket(cpu: *cpu_core.Chip8, display: display_core.Display, so
             const message = message_from_vram(cpu.vram);
             _ = socket.send(&message, &address) catch 0;
             display.render(&cpu.vram);
+        }
+
+        if (cpu.should_play_sound) {
+            audio.play();
         }
 
         std.time.sleep(SLEEP_TIME);

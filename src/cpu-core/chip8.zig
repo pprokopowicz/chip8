@@ -26,6 +26,7 @@ pub const Chip8 = struct {
     delay_timer: u8,
     sound_timer: u8,
     should_draw: bool,
+    should_play_sound: bool,
 
     pub fn new() Chip8 {
         log.info("New Chip8 CPU initialized!", .{});
@@ -43,6 +44,7 @@ pub const Chip8 = struct {
             .delay_timer = 0,
             .sound_timer = 0,
             .should_draw = false,
+            .should_play_sound = false,
         };
     }
 
@@ -68,6 +70,7 @@ pub const Chip8 = struct {
 
     pub fn emulate_cycle(self: *Chip8) void {
         self.should_draw = false;
+        self.should_play_sound = false;
 
         self.fetch_opcode();
         self.execute_opcode();
@@ -92,7 +95,7 @@ pub const Chip8 = struct {
     fn check_sound_timer(self: *Chip8) void {
         if (self.sound_timer > 0) {
             if (self.sound_timer == 1) {
-                log.info("Beep!", .{});
+                self.should_play_sound = true;
             }
 
             self.sound_timer -= 1;

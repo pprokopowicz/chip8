@@ -15,6 +15,7 @@ const display_name = "display";
 const input_event_name = "input-event";
 const keypad_name = "keypad";
 const socket_name = "socket";
+const audio_name = "audio";
 
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
@@ -27,9 +28,10 @@ pub fn build(b: *std.Build) !void {
     const input_event = input_event_module(b, target, optimize);
     const keypad = keypad_module(b, target, optimize);
     const socket = socket_module(b, target, optimize);
+    const audio = audio_module(b, target, optimize);
     const exe = executable_compile(b, target, optimize);
 
-    const link_modules = [_]*Module{ display, keypad, input_event };
+    const link_modules = [_]*Module{ display, keypad, input_event, audio };
     try link_sdl(&link_modules, exe);
 
     cpu_core.addImport(constant_name, constant);
@@ -42,6 +44,7 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport(input_event_name, input_event);
     exe.root_module.addImport(keypad_name, keypad);
     exe.root_module.addImport(socket_name, socket);
+    exe.root_module.addImport(audio_name, audio);
 
     b.installArtifact(exe);
 
@@ -99,6 +102,14 @@ fn keypad_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) 
 fn socket_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
     return b.addModule(socket_name, .{
         .root_source_file = b.path("src/socket/socket.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+}
+
+fn audio_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
+    return b.addModule(audio_name, .{
+        .root_source_file = b.path("src/audio/audio.zig"),
         .target = target,
         .optimize = optimize,
     });
