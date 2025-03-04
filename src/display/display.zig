@@ -47,7 +47,7 @@ pub const Display = struct {
     fn initialize() !void {
         if (!sdl.SDL_Init(sdl.SDL_INIT_VIDEO)) {
             const err = sdl.SDL_GetError();
-            log.info("Failed to initialize video with error: {s}", .{err});
+            log.warn("Failed to initialize video with error: {s}", .{err});
             return DisplayError.FailedToInitialize;
         }
     }
@@ -59,7 +59,7 @@ pub const Display = struct {
 
         if (window == null) {
             const err = sdl.SDL_GetError();
-            log.info("Failed to create window with error: {s}", .{err});
+            log.warn("Failed to create window with error: {s}", .{err});
             return DisplayError.FailedToCreateWindow;
         }
 
@@ -71,7 +71,7 @@ pub const Display = struct {
 
         if (renderer == null) {
             const err = sdl.SDL_GetError();
-            log.info("Failed to create renderer with error: {s}", .{err});
+            log.warn("Failed to create renderer with error: {s}", .{err});
             return DisplayError.FailedToCreateRenderer;
         }
 
@@ -83,7 +83,7 @@ pub const Display = struct {
 
         if (texture == null) {
             const err = sdl.SDL_GetError();
-            log.info("Failed to create texture with error: {s}", .{err});
+            log.warn("Failed to create texture with error: {s}", .{err});
             return DisplayError.FailedToCreateTexture;
         }
 
