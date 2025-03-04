@@ -13,9 +13,9 @@ const ArgumentError = error{
 pub const Config = struct {
     file_path: []u8,
     display_config: DisplayConfig,
-    socket_config: SocketConfig,
+    socket_config: ?SocketConfig,
 
-    fn new(file_path: []u8, display_config: DisplayConfig, socket_config: SocketConfig) Config {
+    fn new(file_path: []u8, display_config: DisplayConfig, socket_config: ?SocketConfig) Config {
         return Config{
             .file_path = file_path,
             .display_config = display_config,
@@ -51,7 +51,11 @@ pub fn config() !Config {
         background_color,
     );
 
-    const socket_config = SocketConfig.new(constant.DEFAULT_ADDRESS, port);
+    var socket_config: ?SocketConfig = null;
+
+    if (port) |port_value| {
+        socket_config = SocketConfig.new(constant.DEFAULT_ADDRESS, port_value);
+    }
 
     return Config.new(file_path, display_config, socket_config);
 }
@@ -99,14 +103,14 @@ fn background_color_argument(args: [][*:0]u8) !u32 {
     }
 }
 
-fn port_argument(args: [][*:0]u8) !u16 {
+fn port_argument(args: [][*:0]u8) !?u16 {
     const port_arg = try named_argument(PORT_NAME, args);
 
     if (port_arg) |port| {
         const port_int = try int_from_string(u16, port, 10);
         return port_int;
     } else {
-        return constant.DEFAULT_PORT;
+        return null;
     }
 }
 

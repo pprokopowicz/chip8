@@ -122,6 +122,7 @@ fn link_sdl(modules: []const *Module, exe: *Compile) !void {
 
 fn add_run_step(b: *std.Build, exe: *Compile) void {
     const run_exe = b.addRunArtifact(exe);
+
     if (b.args) |args| {
         run_exe.addArgs(args);
     }

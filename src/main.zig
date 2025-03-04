@@ -7,19 +7,12 @@ const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
 const Socket = @import("socket").Socket;
+const SocketConfig = @import("socket").SocketConfig;
 
 const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
 
 pub fn main() !void {
     const config = try arguments.config();
-
-    var socket = try Socket.new(config.socket_config);
-    defer socket.close();
-
-    try socket.bind();
-
-    const response = try socket.receive(1024);
-    var address = response.address;
 
     var cpu = cpu_core.Chip8.new();
     try cpu.load(config.file_path);
@@ -27,7 +20,38 @@ pub fn main() !void {
     const display = try display_core.Display.new(config.display_config);
     defer display.quit();
 
+    if (config.socket_config) |socket_config| {
+        try game_loop_with_socket(&cpu, display, socket_config);
+    } else {
+        game_loop(&cpu, display);
+    }
+}
+
+fn game_loop(cpu: *cpu_core.Chip8, display: display_core.Display) void {
     var quit = false;
+
+    while (!quit) {
+        cpu.emulate_cycle();
+
+        parse_event(&cpu.keypad, &quit);
+
+        if (cpu.should_draw) {
+            display.render(&cpu.vram);
+        }
+
+        std.time.sleep(SLEEP_TIME);
+    }
+}
+
+fn game_loop_with_socket(cpu: *cpu_core.Chip8, display: display_core.Display, socket_config: SocketConfig) !void {
+    var socket = try Socket.new(socket_config);
+    try socket.bind();
+
+    const response = try socket.receive(1024);
+    var address = response.address;
+
+    var quit = false;
+
     while (!quit) {
         cpu.emulate_cycle();
 
