@@ -4,6 +4,7 @@ const sdl = @cImport({
     @cInclude("SDL3/SDL_audio.h");
 });
 const std = @import("std");
+const log = std.log;
 const AudioError = @import("audio_error.zig").AudioError;
 
 pub const Audio = struct {
@@ -16,13 +17,15 @@ pub const Audio = struct {
         const stream = try audio_stream(device_id);
         errdefer sdl.SDL_DestroyAudioStream(stream);
 
+        log.info("New Audio initialized!", .{});
+
         return Audio{ .stream = stream };
     }
 
     fn initialize() !void {
         if (!sdl.SDL_Init(sdl.SDL_INIT_AUDIO)) {
             const err = sdl.SDL_GetError();
-            std.log.warn("Failed to initialize audio with error: {s}", .{err});
+            log.warn("Failed to initialize audio with error: {s}", .{err});
             return AudioError.FailedToInitialize;
         }
     }
@@ -45,7 +48,7 @@ pub const Audio = struct {
             return stream;
         } else {
             const sdl_error = sdl.SDL_GetError();
-            std.log.warn("Audio error: {s}", .{sdl_error});
+            log.warn("Audio error: {s}", .{sdl_error});
             return AudioError.UnableToOpenSteam;
         }
     }

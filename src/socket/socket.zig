@@ -1,5 +1,5 @@
 const std = @import("std");
-const expect = std.testing.expect;
+const log = std.log;
 const net = std.net;
 const posix = std.posix;
 const Response = @import("response.zig").Response;
@@ -7,6 +7,7 @@ const Response = @import("response.zig").Response;
 pub const SocketConfig = @import("socket_config.zig").SocketConfig;
 
 pub const Socket = struct {
+    config: SocketConfig,
     address: std.net.Address,
     socket: posix.socket_t,
 
@@ -16,7 +17,7 @@ pub const Socket = struct {
 
         errdefer posix.close(sock);
 
-        return Socket{ .address = parsed_address, .socket = sock };
+        return Socket{ .config = config, .address = parsed_address, .socket = sock };
     }
 
     pub fn bind(self: *Socket) !void {
@@ -38,6 +39,8 @@ pub const Socket = struct {
 
         var client_address: std.posix.sockaddr = undefined;
         var client_address_length: std.posix.socklen_t = undefined;
+
+        log.info("Waiting for data on port {}", .{self.config.port});
 
         const len = try posix.recvfrom(
             self.socket,
