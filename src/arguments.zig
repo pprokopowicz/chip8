@@ -1,6 +1,7 @@
 const std = @import("std");
 const constant = @import("constant");
 const DisplayConfig = @import("display").DisplayConfig;
+const SocketConfig = @import("socket").SocketConfig;
 const log = std.log;
 
 const ArgumentError = error{
@@ -12,11 +13,13 @@ const ArgumentError = error{
 pub const Config = struct {
     file_path: []u8,
     display_config: DisplayConfig,
+    socket_config: ?SocketConfig,
 
-    fn new(file_path: []u8, display_config: DisplayConfig) Config {
+    fn new(file_path: []u8, display_config: DisplayConfig, socket_config: ?SocketConfig) Config {
         return Config{
             .file_path = file_path,
             .display_config = display_config,
+            .socket_config = socket_config,
         };
     }
 };
@@ -26,6 +29,7 @@ const DISPLAY_SCALE_NAME = "--scale";
 const FOREGROUND_NAME = "--foreground-color";
 const BACKGROUND_NAME = "--background-color";
 const ADDRESS_NAME = "--address";
+const PORT_NAME = "--port";
 
 pub fn config() !Config {
     const args = std.os.argv;
@@ -39,6 +43,7 @@ pub fn config() !Config {
     const display_scale = try display_scale_argument(args);
     const foreground_color = try foreground_color_argument(args);
     const background_color = try background_color_argument(args);
+    const port = try port_argument(args);
 
     const display_config = DisplayConfig.new(
         display_scale,
@@ -46,7 +51,13 @@ pub fn config() !Config {
         background_color,
     );
 
-    return Config.new(file_path, display_config);
+    var socket_config: ?SocketConfig = null;
+
+    if (port) |port_value| {
+        socket_config = SocketConfig.new(constant.DEFAULT_ADDRESS, port_value);
+    }
+
+    return Config.new(file_path, display_config, socket_config);
 }
 
 fn file_path_argument(args: [][*:0]u8) ![]u8 {
@@ -89,6 +100,17 @@ fn background_color_argument(args: [][*:0]u8) !u32 {
         return add_alpha(background_int);
     } else {
         return constant.DEFAULT_BACKGROUND_COLOR;
+    }
+}
+
+fn port_argument(args: [][*:0]u8) !?u16 {
+    const port_arg = try named_argument(PORT_NAME, args);
+
+    if (port_arg) |port| {
+        const port_int = try int_from_string(u16, port, 10);
+        return port_int;
+    } else {
+        return null;
     }
 }
 
