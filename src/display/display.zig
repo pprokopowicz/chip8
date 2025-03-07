@@ -22,9 +22,6 @@ pub const Display = struct {
     pub fn new(config: DisplayConfig) !Display {
         sdl.SDL_SetMainReady();
 
-        try initialize();
-        errdefer sdl.SDL_Quit();
-
         const window = try new_window(config);
         errdefer sdl.SDL_DestroyWindow(window);
 
@@ -42,14 +39,6 @@ pub const Display = struct {
             .renderer = renderer,
             .texture = texture,
         };
-    }
-
-    fn initialize() !void {
-        if (!sdl.SDL_Init(sdl.SDL_INIT_VIDEO)) {
-            const err = sdl.SDL_GetError();
-            log.warn("Failed to initialize video with error: {s}", .{err});
-            return DisplayError.FailedToInitialize;
-        }
     }
 
     fn new_window(config: DisplayConfig) !?*sdl.struct_SDL_Window {
@@ -96,7 +85,6 @@ pub const Display = struct {
         sdl.SDL_DestroyTexture(self.texture);
         sdl.SDL_DestroyRenderer(self.renderer);
         sdl.SDL_DestroyWindow(self.window);
-        sdl.SDL_Quit();
     }
 
     pub fn render(self: Display, vram: []u1) void {

@@ -11,7 +11,6 @@ pub const Audio = struct {
     stream: *sdl.SDL_AudioStream,
 
     pub fn new() !Audio {
-        try initialize();
         const device_id = sdl.SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK;
 
         const stream = try audio_stream(device_id);
@@ -20,14 +19,6 @@ pub const Audio = struct {
         log.info("New Audio initialized!", .{});
 
         return Audio{ .stream = stream };
-    }
-
-    fn initialize() !void {
-        if (!sdl.SDL_Init(sdl.SDL_INIT_AUDIO)) {
-            const err = sdl.SDL_GetError();
-            log.warn("Failed to initialize audio with error: {s}", .{err});
-            return AudioError.FailedToInitialize;
-        }
     }
 
     fn audio_stream(device_id: u32) !*sdl.SDL_AudioStream {
@@ -62,6 +53,9 @@ pub const Audio = struct {
     }
 
     pub fn quit(self: Audio) void {
+        _ = sdl.SDL_FlushAudioStream(self.stream);
+        _ = sdl.SDL_PauseAudioStreamDevice(self.stream);
         sdl.SDL_DestroyAudioStream(self.stream);
+        sdl.SDL_CloseAudioDevice(sdl.SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
     }
 };

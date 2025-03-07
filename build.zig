@@ -12,7 +12,7 @@ const constant_name = "constant";
 const cpu_core_name = "cpu-core";
 const cartridge_name = "cartridge";
 const display_name = "display";
-const input_event_name = "input-event";
+const utility_name = "utility";
 const keypad_name = "keypad";
 const socket_name = "socket";
 const audio_name = "audio";
@@ -25,12 +25,12 @@ pub fn build(b: *std.Build) !void {
     const cpu_core = cpu_core_module(b, target, optimize);
     const cartridge = cartridge_module(b, target, optimize);
     const display = display_module(b, target, optimize);
-    const input_event = input_event_module(b, target, optimize);
+    const utility = utility_module(b, target, optimize);
     const keypad = keypad_module(b, target, optimize);
     const audio = audio_module(b, target, optimize);
     const exe = executable_compile(b, target, optimize);
 
-    const link_modules = [_]*Module{ display, keypad, input_event, audio };
+    const link_modules = [_]*Module{ display, keypad, utility, audio };
     try link_sdl(&link_modules, exe);
 
     cpu_core.addImport(constant_name, constant);
@@ -40,7 +40,7 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport(constant_name, constant);
     exe.root_module.addImport(cpu_core_name, cpu_core);
     exe.root_module.addImport(display_name, display);
-    exe.root_module.addImport(input_event_name, input_event);
+    exe.root_module.addImport(utility_name, utility);
     exe.root_module.addImport(keypad_name, keypad);
     exe.root_module.addImport(audio_name, audio);
 
@@ -81,9 +81,9 @@ fn display_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode)
     });
 }
 
-fn input_event_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(input_event_name, .{
-        .root_source_file = b.path("src/input-event/parse_event.zig"),
+fn utility_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
+    return b.addModule(utility_name, .{
+        .root_source_file = b.path("src/utility/root.zig"),
         .target = target,
         .optimize = optimize,
     });

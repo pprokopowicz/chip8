@@ -2,7 +2,7 @@ const constant = @import("constant");
 const cpu_core = @import("cpu-core");
 const display_core = @import("display");
 const keypad_core = @import("keypad");
-const input_event = @import("input-event");
+const utility_core = @import("utility");
 const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
@@ -13,6 +13,9 @@ const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
 
 pub fn main() !void {
     const config = try arguments.config();
+
+    const subsystems = try utility_core.Subsystems.new();
+    defer subsystems.quit();
 
     var cpu = cpu_core.Chip8.new();
     try cpu.load(config.file_path);
@@ -43,8 +46,8 @@ pub fn main() !void {
 }
 
 fn parse_event(keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {
-    var event: input_event.InputEvent = input_event.InputEvent.none;
-    input_event.parse_event(&event);
+    var event: utility_core.InputEvent = utility_core.InputEvent.none;
+    utility_core.parse_event(&event);
 
     switch (event) {
         .quit => quit.* = true,
