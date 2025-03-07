@@ -1,6 +1,7 @@
 .{
-    .name = "chip8",
+    .name = .chip8,
     .version = "0.0.0",
+    .fingerprint = 0xa61914abaec647b7,
     .dependencies = .{},
     .paths = .{
         "build.zig",
