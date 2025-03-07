@@ -7,7 +7,6 @@ const std = @import("std");
 const arguments = @import("arguments.zig");
 const log = std.log;
 const Audio = @import("audio").Audio;
-const Socket = @import("socket").Socket;
 const SocketConfig = @import("socket").SocketConfig;
 
 const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
@@ -18,20 +17,12 @@ pub fn main() !void {
     var cpu = cpu_core.Chip8.new();
     try cpu.load(config.file_path);
 
-    const audio = try Audio.new();
-    defer audio.quit();
-
     const display = try display_core.Display.new(config.display_config);
     defer display.quit();
 
-    if (config.socket_config) |socket_config| {
-        try game_loop_with_socket(&cpu, display, audio, socket_config);
-    } else {
-        game_loop(&cpu, display, audio);
-    }
-}
+    const audio = try Audio.new();
+    defer audio.quit();
 
-fn game_loop(cpu: *cpu_core.Chip8, display: display_core.Display, audio: Audio) void {
     var quit = false;
 
     while (!quit) {
@@ -49,46 +40,6 @@ fn game_loop(cpu: *cpu_core.Chip8, display: display_core.Display, audio: Audio) 
 
         std.time.sleep(SLEEP_TIME);
     }
-}
-
-fn game_loop_with_socket(cpu: *cpu_core.Chip8, display: display_core.Display, audio: Audio, socket_config: SocketConfig) !void {
-    var socket = try Socket.new(socket_config);
-    defer socket.close();
-
-    try socket.bind();
-
-    const response = try socket.receive(1024);
-    var address = response.address;
-
-    var quit = false;
-
-    while (!quit) {
-        cpu.emulate_cycle();
-
-        parse_event(&cpu.keypad, &quit);
-
-        if (cpu.should_draw) {
-            const message = message_from_vram(cpu.vram);
-            _ = socket.send(&message, &address) catch 0;
-            display.render(&cpu.vram);
-        }
-
-        if (cpu.should_play_sound) {
-            audio.play();
-        }
-
-        std.time.sleep(SLEEP_TIME);
-    }
-}
-
-fn message_from_vram(vram: [constant.VRAM_SIZE]u1) [constant.VRAM_SIZE]u8 {
-    var message: [constant.VRAM_SIZE]u8 = undefined;
-
-    for (vram, 0..vram.len) |value, index| {
-        message[index] = @intCast(value);
-    }
-
-    return message;
 }
 
 fn parse_event(keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {

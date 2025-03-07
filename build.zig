@@ -27,7 +27,6 @@ pub fn build(b: *std.Build) !void {
     const display = display_module(b, target, optimize);
     const input_event = input_event_module(b, target, optimize);
     const keypad = keypad_module(b, target, optimize);
-    const socket = socket_module(b, target, optimize);
     const audio = audio_module(b, target, optimize);
     const exe = executable_compile(b, target, optimize);
 
@@ -43,7 +42,6 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport(display_name, display);
     exe.root_module.addImport(input_event_name, input_event);
     exe.root_module.addImport(keypad_name, keypad);
-    exe.root_module.addImport(socket_name, socket);
     exe.root_module.addImport(audio_name, audio);
 
     b.installArtifact(exe);
@@ -94,14 +92,6 @@ fn input_event_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeM
 fn keypad_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
     return b.addModule(keypad_name, .{
         .root_source_file = b.path("src/keypad/keypad.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-}
-
-fn socket_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(socket_name, .{
-        .root_source_file = b.path("src/socket/socket.zig"),
         .target = target,
         .optimize = optimize,
     });
