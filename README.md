@@ -14,7 +14,7 @@ Available arguments:
 - `--rom` path to rom file, this is the only argument that's mandatory.
 - `--scale` sets window display with scale from original resolution of 64x32. Default value is 16.
 - `--foreground-color` sets texture foreground color, pass this value in hex. Default is white.
-- `--background-color` sets texture background color, pass this value in hex. Default is background.
+- `--background-color` sets texture background color, pass this value in hex. Default is black.
 
 Command with every option might look like this:
 ```console
