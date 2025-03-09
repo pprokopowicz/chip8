@@ -1,8 +1,8 @@
 const std = @import("std");
 const cartridge = @import("cartridge");
 const constant = @import("constant");
-const font_set = @import("font.zig").font_set;
 const opcode = @import("opcode_execution.zig");
+const font_set = @import("font.zig").font_set;
 const log = std.log;
 
 const MEMORY_SIZE = 4096;

@@ -14,7 +14,6 @@ const cartridge_name = "cartridge";
 const display_name = "display";
 const utility_name = "utility";
 const keypad_name = "keypad";
-const socket_name = "socket";
 const audio_name = "audio";
 
 pub fn build(b: *std.Build) !void {

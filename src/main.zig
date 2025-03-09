@@ -1,26 +1,30 @@
+const std = @import("std");
 const constant = @import("constant");
-const cpu_core = @import("cpu-core");
-const display_core = @import("display");
 const keypad_core = @import("keypad");
 const utility_core = @import("utility");
-const std = @import("std");
+
 const arguments = @import("arguments.zig");
-const log = std.log;
+
+const Chip8 = @import("cpu-core").Chip8;
+const Display = @import("display").Display;
 const Audio = @import("audio").Audio;
-const SocketConfig = @import("socket").SocketConfig;
+
+const Subsystems = utility_core.Subsystems;
+const InputEvent = utility_core.InputEvent;
+const log = std.log;
 
 const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
 
 pub fn main() !void {
     const config = try arguments.config();
 
-    const subsystems = try utility_core.Subsystems.new();
+    const subsystems = try Subsystems.new();
     defer subsystems.quit();
 
-    var cpu = cpu_core.Chip8.new();
+    var cpu = Chip8.new();
     try cpu.load(config.file_path);
 
-    const display = try display_core.Display.new(config.display_config);
+    const display = try Display.new(config.display_config);
     defer display.quit();
 
     const audio = try Audio.new();
@@ -46,7 +50,7 @@ pub fn main() !void {
 }
 
 fn parse_event(keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {
-    var event: utility_core.InputEvent = utility_core.InputEvent.none;
+    var event: InputEvent = InputEvent.none;
     utility_core.parse_event(&event);
 
     switch (event) {
@@ -57,7 +61,7 @@ fn parse_event(keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {
     }
 }
 
-fn debug_render(cpu: cpu_core.Chip8) void {
+fn debug_render(cpu: Chip8) void {
     var y: usize = 0;
 
     while (y < constant.INTERNAL_DISPLAY_HEIGHT) : (y += 1) {
