@@ -1,48 +1,46 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
 const std = @import("std");
 const constant = @import("constant");
 const log = std.log;
+const sdl = @import("sdl");
 
 const KEYPAD_SIZE = constant.KEYPAD_SIZE;
 
 pub fn parse_key_down(key_code: u32, keypad: *[KEYPAD_SIZE]u1) void {
-    const index = index_from_key_code(key_code);
-    if (index != null) {
-        keypad[index.?] = 1;
+    const index_optional = index_from_key_code(key_code);
+
+    if (index_optional) |index| {
+        keypad[index] = 1;
     }
 }
 
 pub fn parse_key_up(key_code: u32, keypad: *[KEYPAD_SIZE]u1) void {
-    const index = index_from_key_code(key_code);
+    const index_optional = index_from_key_code(key_code);
 
-    if (index != null) {
-        keypad[index.?] = 0;
+    if (index_optional) |index| {
+        keypad[index] = 0;
     }
 }
 
 fn index_from_key_code(key_code: u32) ?usize {
-    const c_key_code: c_int = @intCast(key_code);
+    const scan_code = sdl.scan_code_from(key_code);
 
-    return switch (c_key_code) {
-        sdl.SDL_SCANCODE_X => 0,
-        sdl.SDL_SCANCODE_1 => 1,
-        sdl.SDL_SCANCODE_2 => 2,
-        sdl.SDL_SCANCODE_3 => 3,
-        sdl.SDL_SCANCODE_Q => 4,
-        sdl.SDL_SCANCODE_W => 5,
-        sdl.SDL_SCANCODE_E => 6,
-        sdl.SDL_SCANCODE_A => 7,
-        sdl.SDL_SCANCODE_S => 8,
-        sdl.SDL_SCANCODE_D => 9,
-        sdl.SDL_SCANCODE_Z => 10,
-        sdl.SDL_SCANCODE_C => 11,
-        sdl.SDL_SCANCODE_4 => 12,
-        sdl.SDL_SCANCODE_R => 13,
-        sdl.SDL_SCANCODE_F => 14,
-        sdl.SDL_SCANCODE_V => 15,
+    return switch (scan_code) {
+        sdl.ScanCode.x => 0,
+        sdl.ScanCode._1 => 1,
+        sdl.ScanCode._2 => 2,
+        sdl.ScanCode._3 => 3,
+        sdl.ScanCode.q => 4,
+        sdl.ScanCode.w => 5,
+        sdl.ScanCode.e => 6,
+        sdl.ScanCode.a => 7,
+        sdl.ScanCode.s => 8,
+        sdl.ScanCode.d => 9,
+        sdl.ScanCode.z => 10,
+        sdl.ScanCode.c => 11,
+        sdl.ScanCode._4 => 12,
+        sdl.ScanCode.r => 13,
+        sdl.ScanCode.f => 14,
+        sdl.ScanCode.v => 15,
         else => null,
     };
 }

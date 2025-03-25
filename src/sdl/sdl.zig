@@ -28,6 +28,10 @@ pub const PixelFormat = @import("pixel_format.zig").PixelFormat;
 pub const TextureAccess = @import("texture_access.zig").TextureAccess;
 pub const ScaleMode = @import("scale_mode.zig").ScaleMode;
 
+const scan_code_mod = @import("scan_code.zig");
+pub const ScanCode = scan_code_mod.ScanCode;
+pub const scan_code_from = scan_code_mod.scan_code_from;
+
 pub const FloatRect = @import("float_rect.zig").FloatRect;
 pub const Rect = @import("rect.zig").Rect;
 

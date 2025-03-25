@@ -32,13 +32,14 @@ pub fn build(b: *std.Build) !void {
 
     const exe = executable_compile(b, target, optimize);
 
-    const link_modules = [_]*Module{ keypad, utility, audio, sdl };
+    const link_modules = [_]*Module{ utility, audio, sdl };
     try link_sdl(&link_modules, exe);
 
     cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
     display.addImport(constant_name, constant);
     display.addImport(sdl_name, sdl);
+    keypad.addImport(sdl_name, sdl);
     keypad.addImport(constant_name, constant);
 
     exe.root_module.addImport(constant_name, constant);
