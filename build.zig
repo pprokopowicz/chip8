@@ -15,6 +15,7 @@ const display_name = "display";
 const utility_name = "utility";
 const keypad_name = "keypad";
 const audio_name = "audio";
+const sdl_name = "sdl";
 
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
@@ -27,15 +28,19 @@ pub fn build(b: *std.Build) !void {
     const utility = utility_module(b, target, optimize);
     const keypad = keypad_module(b, target, optimize);
     const audio = audio_module(b, target, optimize);
+    const sdl = sdl_module(b, target, optimize);
+
     const exe = executable_compile(b, target, optimize);
 
-    const link_modules = [_]*Module{ display, keypad, utility, audio };
+    const link_modules = [_]*Module{ keypad, utility, audio, sdl };
     try link_sdl(&link_modules, exe);
 
     cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
     display.addImport(constant_name, constant);
+    display.addImport(sdl_name, sdl);
     keypad.addImport(constant_name, constant);
+
     exe.root_module.addImport(constant_name, constant);
     exe.root_module.addImport(cpu_core_name, cpu_core);
     exe.root_module.addImport(display_name, display);
@@ -99,6 +104,14 @@ fn keypad_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) 
 fn audio_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
     return b.addModule(audio_name, .{
         .root_source_file = b.path("src/audio/audio.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+}
+
+fn sdl_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
+    return b.addModule(sdl_name, .{
+        .root_source_file = b.path("src/sdl/sdl.zig"),
         .target = target,
         .optimize = optimize,
     });

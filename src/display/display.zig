@@ -1,7 +1,4 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
+const sdl = @import("sdl");
 const constant = @import("constant");
 const std = @import("std");
 const log = std.log;
@@ -15,21 +12,21 @@ pub const DisplayConfig = @import("display_config.zig").DisplayConfig;
 
 pub const Display = struct {
     config: DisplayConfig,
-    window: ?*sdl.struct_SDL_Window,
-    renderer: ?*sdl.struct_SDL_Renderer,
-    texture: [*c]sdl.struct_SDL_Texture,
+    window: ?*sdl.Window,
+    renderer: ?*sdl.Renderer,
+    texture: ?*sdl.Texture,
 
     pub fn new(config: DisplayConfig) !Display {
-        sdl.SDL_SetMainReady();
+        sdl.set_main_ready();
 
         const window = try new_window(config);
-        errdefer sdl.SDL_DestroyWindow(window);
+        errdefer sdl.destroy_window(window);
 
         const renderer = try new_renderer(window);
-        errdefer sdl.SDL_DestroyRenderer(renderer);
+        errdefer sdl.destroy_renderer(renderer);
 
         const texture = try new_texture(renderer);
-        errdefer sdl.SDL_DestroyTexture(texture);
+        errdefer sdl.destroy_texture(texture);
 
         log.info("New Display initialized!", .{});
 
@@ -41,13 +38,11 @@ pub const Display = struct {
         };
     }
 
-    fn new_window(config: DisplayConfig) !?*sdl.struct_SDL_Window {
-        const width: c_int = @intCast(config.width);
-        const height: c_int = @intCast(config.height);
-        const window = sdl.SDL_CreateWindow(WINDOW_NAME, width, height, 0);
+    fn new_window(config: DisplayConfig) !?*sdl.Window {
+        const window = sdl.create_window(WINDOW_NAME, config.width, config.height, 0);
 
         if (window == null) {
-            const err = sdl.SDL_GetError();
+            const err = sdl.get_error();
             log.warn("Failed to create window with error: {s}", .{err});
             return DisplayError.FailedToCreateWindow;
         }
@@ -55,11 +50,11 @@ pub const Display = struct {
         return window;
     }
 
-    fn new_renderer(window: ?*sdl.struct_SDL_Window) !?*sdl.struct_SDL_Renderer {
-        const renderer = sdl.SDL_CreateRenderer(window, null);
+    fn new_renderer(window: ?*sdl.Window) !?*sdl.Renderer {
+        const renderer = sdl.create_renderer(window, null);
 
         if (renderer == null) {
-            const err = sdl.SDL_GetError();
+            const err = sdl.get_error();
             log.warn("Failed to create renderer with error: {s}", .{err});
             return DisplayError.FailedToCreateRenderer;
         }
@@ -67,44 +62,44 @@ pub const Display = struct {
         return renderer;
     }
 
-    fn new_texture(renderer: ?*sdl.struct_SDL_Renderer) ![*c]sdl.struct_SDL_Texture {
-        const texture = sdl.SDL_CreateTexture(renderer, sdl.SDL_PIXELFORMAT_RGBA8888, sdl.SDL_TEXTUREACCESS_STREAMING, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+    fn new_texture(renderer: ?*sdl.Renderer) ![*c]sdl.Texture {
+        const texture = sdl.create_texture(renderer, sdl.PixelFormat.rgba8888, sdl.TextureAccess.streaming, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
         if (texture == null) {
-            const err = sdl.SDL_GetError();
+            const err = sdl.get_error();
             log.warn("Failed to create texture with error: {s}", .{err});
             return DisplayError.FailedToCreateTexture;
         }
 
-        _ = sdl.SDL_SetTextureScaleMode(texture, sdl.SDL_SCALEMODE_NEAREST);
+        _ = sdl.set_texture_scale_mode(texture, sdl.ScaleMode.nearest);
 
         return texture;
     }
 
     pub fn quit(self: Display) void {
-        sdl.SDL_DestroyTexture(self.texture);
-        sdl.SDL_DestroyRenderer(self.renderer);
-        sdl.SDL_DestroyWindow(self.window);
+        sdl.destroy_texture(self.texture);
+        sdl.destroy_texture(self.texture);
+        sdl.destroy_window(self.window);
     }
 
     pub fn render(self: Display, vram: []u1) void {
-        _ = sdl.SDL_RenderClear(self.renderer);
+        _ = sdl.render_clear(self.renderer);
 
         self.buildTexture(vram);
 
         const width: f32 = @floatFromInt(self.config.width);
         const height: f32 = @floatFromInt(self.config.height);
-        var dest = sdl.SDL_FRect{ .x = 0, .y = 0, .w = width, .h = height };
+        var dest = sdl.FloatRect{ .x = 0, .y = 0, .w = width, .h = height };
 
-        _ = sdl.SDL_RenderTexture(self.renderer, self.texture, null, &dest);
-        _ = sdl.SDL_RenderPresent(self.renderer);
+        _ = sdl.render_texture(self.renderer, self.texture, null, &dest);
+        _ = sdl.render_present(self.renderer);
     }
 
     fn buildTexture(self: Display, vram: []u1) void {
         var pixels: ?[*]u32 = null;
-        var pitch: c_int = 0;
+        var pitch: u32 = 0;
 
-        _ = sdl.SDL_LockTexture(self.texture, null, @as([*c]?*anyopaque, @ptrCast(&pixels)), &pitch);
+        _ = sdl.lock_texture(self.texture, null, &pixels, &pitch);
 
         var y: usize = 0;
         while (y < TEXTURE_HEIGHT) : (y += 1) {
@@ -117,6 +112,6 @@ pub const Display = struct {
                 }
             }
         }
-        sdl.SDL_UnlockTexture(self.texture);
+        sdl.unlock_texture(self.texture);
     }
 };
