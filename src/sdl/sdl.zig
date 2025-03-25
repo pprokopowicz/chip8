@@ -3,79 +3,36 @@ const sdl = @cImport({
     @cInclude("SDL3/SDL_main.h");
 });
 
-pub const Window = sdl.struct_SDL_Window;
-pub const Renderer = sdl.struct_SDL_Renderer;
-pub const Texture = sdl.struct_SDL_Texture;
+const window_mod = @import("window.zig");
+pub const Window = window_mod.Window;
+pub const create_window = window_mod.create_window;
+pub const destroy_window = window_mod.destroy_window;
 
-pub const FloatRect = sdl.SDL_FRect;
-pub const Rect = sdl.SDL_Rect;
+const render_mod = @import("render.zig");
+pub const Renderer = render_mod.Renderer;
+pub const create_renderer = render_mod.create_renderer;
+pub const render_clear = render_mod.render_clear;
+pub const render_texture = render_mod.render_texture;
+pub const render_present = render_mod.render_present;
+pub const destroy_renderer = render_mod.destroy_renderer;
+
+const texture_mod = @import("texture.zig");
+pub const Texture = texture_mod.Texture;
+pub const create_texture = texture_mod.create_texture;
+pub const lock_texture = texture_mod.lock_texture;
+pub const unlock_texture = texture_mod.unlock_texture;
+pub const set_texture_scale_mode = texture_mod.set_texture_scale_mode;
+pub const destroy_texture = texture_mod.destroy_texture;
+
 pub const PixelFormat = @import("pixel_format.zig").PixelFormat;
 pub const TextureAccess = @import("texture_access.zig").TextureAccess;
 pub const ScaleMode = @import("scale_mode.zig").ScaleMode;
 
+pub const FloatRect = @import("float_rect.zig").FloatRect;
+pub const Rect = @import("rect.zig").Rect;
+
 pub fn set_main_ready() void {
     sdl.SDL_SetMainReady();
-}
-
-pub fn create_window(title: [*c]const u8, width: u32, height: u32, flags: u64) ?*Window {
-    const w: c_int = @intCast(width);
-    const h: c_int = @intCast(height);
-    const window = sdl.SDL_CreateWindow(title, w, h, flags);
-
-    return window;
-}
-
-pub fn destroy_window(window: ?*Window) void {
-    sdl.SDL_DestroyWindow(window);
-}
-
-pub fn create_renderer(window: ?*Window, name: [*c]const u8) ?*Renderer {
-    return sdl.SDL_CreateRenderer(window, name);
-}
-
-pub fn render_clear(renderer: ?*Renderer) bool {
-    return sdl.SDL_RenderClear(renderer);
-}
-
-pub fn render_present(renderer: ?*Renderer) bool {
-    return sdl.SDL_RenderPresent(renderer);
-}
-
-pub fn destroy_renderer(renderer: ?*Renderer) void {
-    sdl.SDL_DestroyRenderer(renderer);
-}
-
-pub fn create_texture(renderer: ?*Renderer, format: PixelFormat, access: TextureAccess, width: u32, height: u32) [*c]Texture {
-    const w: c_int = @intCast(width);
-    const h: c_int = @intCast(height);
-    const access_int = @intFromEnum(access);
-    const format_int = @intFromEnum(format);
-
-    const texture = sdl.SDL_CreateTexture(renderer, format_int, access_int, w, h);
-
-    return texture;
-}
-
-pub fn lock_texture(texture: ?*Texture, rect: ?*Rect, pixels: *?[*]u32, pitch: *u32) bool {
-    const pixels_cast = @as([*c]?*anyopaque, @ptrCast(pixels));
-    return sdl.SDL_LockTexture(texture, rect, pixels_cast, @ptrCast(pitch));
-}
-
-pub fn unlock_texture(texture: ?*Texture) void {
-    sdl.SDL_UnlockTexture(texture);
-}
-
-pub fn set_texture_scale_mode(texture: ?*Texture, scale_mode: ScaleMode) bool {
-    const scale_mode_int = @intFromEnum(scale_mode);
-    return sdl.SDL_SetTextureScaleMode(texture, scale_mode_int);
-}
-
-pub fn render_texture(renderer: ?*Renderer, texture: ?*Texture, source_rect: ?*FloatRect, destination_rect: ?*FloatRect) bool {
-    return sdl.SDL_RenderTexture(renderer, texture, source_rect, destination_rect);
-}
-
-pub fn destroy_texture(texture: ?*Texture) void {
-    sdl.SDL_DestroyTexture(texture);
 }
 
 pub fn get_error() [*c]const u8 {
