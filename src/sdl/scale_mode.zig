@@ -3,7 +3,7 @@ const sdl = @cImport({
     @cInclude("SDL3/SDL_main.h");
 });
 
-pub const ScaleMode = enum(c_uint) {
+pub const ScaleMode = enum(c_int) {
     nearest = sdl.SDL_SCALEMODE_NEAREST,
     linear = sdl.SDL_SCALEMODE_LINEAR,
 };

@@ -1,7 +1,4 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
+const sdl = @import("sdl");
 const log = @import("std").log;
 
 const SubsystemError = error{
@@ -10,8 +7,9 @@ const SubsystemError = error{
 
 pub const Subsystems = struct {
     pub fn new() !Subsystems {
-        if (!sdl.SDL_Init(sdl.SDL_INIT_VIDEO | sdl.SDL_INIT_AUDIO)) {
-            const err = sdl.SDL_GetError();
+        const flags = [_]sdl.Init{ .audio, .video };
+        if (!sdl.init(&flags)) {
+            const err = sdl.get_error();
             log.warn("Failed to initialize subsystems with error: {s}", .{err});
             return SubsystemError.FailedToInitialize;
         }
@@ -21,6 +19,6 @@ pub const Subsystems = struct {
 
     pub fn quit(self: Subsystems) void {
         _ = self;
-        sdl.SDL_Quit();
+        sdl.quit();
     }
 };

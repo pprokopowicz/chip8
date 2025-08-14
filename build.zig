@@ -41,6 +41,7 @@ pub fn build(b: *std.Build) !void {
     display.addImport(sdl_name, sdl);
     keypad.addImport(sdl_name, sdl);
     keypad.addImport(constant_name, constant);
+    utility.addImport(sdl_name, sdl);
 
     exe.root_module.addImport(constant_name, constant);
     exe.root_module.addImport(cpu_core_name, cpu_core);

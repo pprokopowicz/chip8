@@ -32,6 +32,10 @@ const scan_code_mod = @import("scan_code.zig");
 pub const ScanCode = scan_code_mod.ScanCode;
 pub const scan_code_from = scan_code_mod.scan_code_from;
 
+const init_mod = @import("init.zig");
+pub const init = init_mod.init;
+pub const Init = init_mod.Init;
+
 pub const FloatRect = @import("float_rect.zig").FloatRect;
 pub const Rect = @import("rect.zig").Rect;
 
@@ -41,4 +45,8 @@ pub fn set_main_ready() void {
 
 pub fn get_error() [*c]const u8 {
     return sdl.SDL_GetError();
+}
+
+pub fn quit() void {
+    sdl.SDL_Quit();
 }
