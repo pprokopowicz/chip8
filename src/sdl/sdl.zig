@@ -39,6 +39,24 @@ pub const Init = init_mod.Init;
 pub const FloatRect = @import("float_rect.zig").FloatRect;
 pub const Rect = @import("rect.zig").Rect;
 
+pub const AudioU8 = sdl.SDL_AUDIO_U8;
+
+pub const audio_device_mod = @import("audio_device.zig");
+pub const AudioDeviceDefaultPlayback = audio_device_mod.AudioDeviceDefaultPlayback;
+pub const close_audio_device = audio_device_mod.close_audio_device;
+
+const audio_spec_mod = @import("audio_spec.zig");
+pub const AudioSpec = audio_spec_mod.AudioSpec;
+
+const audio_stream_mod = @import("audio_stream.zig");
+pub const AudioStream = audio_stream_mod.AudioStream;
+pub const open_audio_device_stream = audio_stream_mod.open_audio_device_stream;
+pub const resume_audio_stream_device = audio_stream_mod.resume_audio_stream_device;
+pub const put_audio_stream_data = audio_stream_mod.put_audio_stream_data;
+pub const destroy_audio_stream = audio_stream_mod.destroy_audio_stream;
+pub const flush_audio_stream = audio_stream_mod.flush_audio_stream;
+pub const pause_audio_stream_device = audio_stream_mod.pause_audio_stream_device;
+
 pub fn set_main_ready() void {
     sdl.SDL_SetMainReady();
 }
