@@ -32,8 +32,7 @@ pub fn build(b: *std.Build) !void {
 
     const exe = executable_compile(b, target, optimize);
 
-    const link_modules = [_]*Module{ utility, sdl };
-    try link_sdl(&link_modules, exe);
+    try link_sdl(sdl, exe);
 
     cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
@@ -129,10 +128,8 @@ fn executable_compile(b: *std.Build, target: ResolvedTarget, optimize: OptimizeM
     });
 }
 
-fn link_sdl(modules: []const *Module, exe: *Compile) !void {
-    for (modules) |module| {
-        module.linkSystemLibrary("SDL3", .{ .needed = true });
-    }
+fn link_sdl(module: *Module, exe: *Compile) !void {
+    module.linkSystemLibrary("SDL3", .{ .needed = true });
     exe.linkLibC();
 }
 

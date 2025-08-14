@@ -57,6 +57,11 @@ pub const destroy_audio_stream = audio_stream_mod.destroy_audio_stream;
 pub const flush_audio_stream = audio_stream_mod.flush_audio_stream;
 pub const pause_audio_stream_device = audio_stream_mod.pause_audio_stream_device;
 
+pub const event_mod = @import("event.zig");
+pub const Event = event_mod.Event;
+pub const EventType = event_mod.EventType;
+pub const poll_event = event_mod.poll_event;
+
 pub fn set_main_ready() void {
     sdl.SDL_SetMainReady();
 }

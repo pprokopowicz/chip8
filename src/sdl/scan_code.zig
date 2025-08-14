@@ -257,4 +257,5 @@ pub const ScanCode = enum(c_int) {
     endcall = sdl.SDL_SCANCODE_ENDCALL,
     reserved = sdl.SDL_SCANCODE_RESERVED,
     count = sdl.SDL_SCANCODE_COUNT,
+    _,
 };
