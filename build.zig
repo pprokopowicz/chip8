@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) !void {
 
     const exe = executable_compile(b, target, optimize);
 
-    try link_sdl(sdl, exe);
+    try link_sdl(sdl);
 
     cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
@@ -122,15 +122,17 @@ fn sdl_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Mo
 fn executable_compile(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Compile {
     return b.addExecutable(.{
         .name = "chip8",
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
     });
 }
 
-fn link_sdl(module: *Module, exe: *Compile) !void {
+fn link_sdl(module: *Module) !void {
     module.linkSystemLibrary("SDL3", .{ .needed = true });
-    exe.linkLibC();
 }
 
 fn add_run_step(b: *std.Build, exe: *Compile) void {

@@ -1,8 +1,4 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
-
+const sdl = @import("sdl.zig").sdl;
 pub fn scan_code_from(value: u32) ScanCode {
     return @enumFromInt(value);
 }

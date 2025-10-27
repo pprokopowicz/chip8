@@ -1,8 +1,5 @@
 const std = @import("std");
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
+const sdl = @import("sdl.zig").sdl;
 const ScanCode = @import("scan_code.zig").ScanCode;
 
 pub const Event = struct {
@@ -14,9 +11,11 @@ pub fn poll_event(event: *Event) bool {
     var sdl_event: sdl.SDL_Event = undefined;
     const return_val = sdl.SDL_PollEvent(&sdl_event);
 
-    const event_type: EventType = @enumFromInt(sdl_event.type);
-    const scan_code: ScanCode = @enumFromInt(sdl_event.key.scancode);
-    event.* = Event{ .event_type = event_type, .scan_code = scan_code };
+    if (return_val) {
+        const event_type: EventType = @enumFromInt(sdl_event.type);
+        const scan_code: ScanCode = @enumFromInt(sdl_event.key.scancode);
+        event.* = Event{ .event_type = event_type, .scan_code = scan_code };
+    }
 
     return return_val;
 }

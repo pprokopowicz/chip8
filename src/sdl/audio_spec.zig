@@ -1,6 +1,3 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
+const sdl = @import("sdl.zig").sdl;
 
 pub const AudioSpec = sdl.SDL_AudioSpec;

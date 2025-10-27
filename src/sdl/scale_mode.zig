@@ -1,7 +1,4 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
+const sdl = @import("sdl.zig").sdl;
 
 pub const ScaleMode = enum(c_int) {
     nearest = sdl.SDL_SCALEMODE_NEAREST,

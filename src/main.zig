@@ -45,7 +45,7 @@ pub fn main() !void {
             audio.play();
         }
 
-        std.time.sleep(SLEEP_TIME);
+        std.Thread.sleep(SLEEP_TIME);
     }
 }
 

@@ -1,7 +1,4 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
+const sdl = @import("sdl.zig").sdl;
 
 pub const TextureAccess = enum(c_uint) {
     static = sdl.SDL_TEXTUREACCESS_STATIC,

@@ -1,7 +1,4 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
+const sdl = @import("sdl.zig").sdl;
 
 const Renderer = @import("render.zig").Renderer;
 const PixelFormat = @import("pixel_format.zig").PixelFormat;

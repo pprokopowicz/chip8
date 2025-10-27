@@ -1,8 +1,4 @@
-const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
-
+const sdl = @import("sdl.zig").sdl;
 const Window = @import("window.zig").Window;
 const Texture = @import("texture.zig").Texture;
 const FloatRect = @import("float_rect.zig").FloatRect;
