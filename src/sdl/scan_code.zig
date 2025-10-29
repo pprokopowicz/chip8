@@ -3,7 +3,7 @@ pub fn scan_code_from(value: u32) ScanCode {
     return @enumFromInt(value);
 }
 
-pub const ScanCode = enum(c_int) {
+pub const ScanCode = enum(c_uint) {
     unknown = sdl.SDL_SCANCODE_UNKNOWN,
     a = sdl.SDL_SCANCODE_A,
     b = sdl.SDL_SCANCODE_B,

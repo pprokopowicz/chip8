@@ -25,7 +25,6 @@ const FILE_PATH_NAME = "--rom";
 const DISPLAY_SCALE_NAME = "--scale";
 const FOREGROUND_NAME = "--foreground-color";
 const BACKGROUND_NAME = "--background-color";
-const ADDRESS_NAME = "--address";
 
 pub fn config() !Config {
     const args = std.os.argv;
