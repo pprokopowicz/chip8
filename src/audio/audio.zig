@@ -2,11 +2,13 @@ const sdl = @import("sdl");
 const std = @import("std");
 const log = std.log;
 const AudioError = @import("audio_error.zig").AudioError;
+pub const AudioConfig = @import("audio_config.zig").AudioConfig;
 
 pub const Audio = struct {
+    config: AudioConfig,
     stream: *sdl.AudioStream,
 
-    pub fn new() !Audio {
+    pub fn new(config: AudioConfig) !Audio {
         const device_id = sdl.AudioDeviceDefaultPlayback;
 
         const stream = try audio_stream(device_id);
@@ -14,7 +16,10 @@ pub const Audio = struct {
 
         log.info("New Audio initialized!", .{});
 
-        return Audio{ .stream = stream };
+        return Audio{
+            .config = config,
+            .stream = stream,
+        };
     }
 
     fn audio_stream(device_id: u32) !*sdl.AudioStream {
@@ -36,10 +41,13 @@ pub const Audio = struct {
     }
 
     pub fn play(self: Audio) void {
+        if (self.config.is_muted) {
+            return;
+        }
+
         var buf: [800]u8 = [1]u8{1} ** 800;
         const buf_many_ptr: ?[*]u8 = &buf;
 
-        // _ = sdl2.SDL_PutAudioStreamData(self.stream, @as(?*const anyopaque, @ptrCast(&buf_many_ptr)), 3000);
         _ = sdl.put_audio_stream_data(self.stream, @as(?*const anyopaque, @ptrCast(&buf_many_ptr)), 3000);
         _ = sdl.resume_audio_stream_device(self.stream);
     }

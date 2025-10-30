@@ -15,10 +15,11 @@ Available arguments:
 - `--scale` sets window display with scale from original resolution of 64x32. Default value is 16.
 - `--foreground-color` sets texture foreground color, pass this value in hex. Default is white.
 - `--background-color` sets texture background color, pass this value in hex. Default is black.
+- `--mute` if added audio will be muted.
 
 Command with every option might look like this:
 ```console
-foo@bar:~$ zig build run -- --rom /file/path/rom.ch8 --scale 32 --foreground-color FFFFFF --background-color 000000
+foo@bar:~$ zig build run -- --rom /file/path/rom.ch8 --scale 32 --foreground-color FFFFFF --background-color 000000 --mute
 ```
 
 ## Notes

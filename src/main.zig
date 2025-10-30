@@ -27,7 +27,7 @@ pub fn main() !void {
     const display = try Display.new(config.display_config);
     defer display.quit();
 
-    const audio = try Audio.new();
+    const audio = try Audio.new(config.audio_config);
     defer audio.quit();
 
     var quit = false;

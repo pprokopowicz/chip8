@@ -1,6 +1,7 @@
 const std = @import("std");
 const constant = @import("constant");
 const DisplayConfig = @import("display").DisplayConfig;
+const AudioConfig = @import("audio").AudioConfig;
 const log = std.log;
 
 const ArgumentError = error{
@@ -12,11 +13,13 @@ const ArgumentError = error{
 pub const Config = struct {
     file_path: []u8,
     display_config: DisplayConfig,
+    audio_config: AudioConfig,
 
-    fn new(file_path: []u8, display_config: DisplayConfig) Config {
+    fn new(file_path: []u8, display_config: DisplayConfig, audio_config: AudioConfig) Config {
         return Config{
             .file_path = file_path,
             .display_config = display_config,
+            .audio_config = audio_config,
         };
     }
 };
@@ -25,6 +28,7 @@ const FILE_PATH_NAME = "--rom";
 const DISPLAY_SCALE_NAME = "--scale";
 const FOREGROUND_NAME = "--foreground-color";
 const BACKGROUND_NAME = "--background-color";
+const AUDIO_MUTE_NAME = "--mute";
 
 pub fn config() !Config {
     const args = std.os.argv;
@@ -38,6 +42,7 @@ pub fn config() !Config {
     const display_scale = try display_scale_argument(args);
     const foreground_color = try foreground_color_argument(args);
     const background_color = try background_color_argument(args);
+    const is_audio_muted = audio_mute_argument(args);
 
     const display_config = DisplayConfig.new(
         display_scale,
@@ -45,7 +50,13 @@ pub fn config() !Config {
         background_color,
     );
 
-    return Config.new(file_path, display_config);
+    const audio_config = AudioConfig.new(is_audio_muted);
+
+    return Config.new(
+        file_path,
+        display_config,
+        audio_config,
+    );
 }
 
 fn file_path_argument(args: [][*:0]u8) ![]u8 {
@@ -89,6 +100,18 @@ fn background_color_argument(args: [][*:0]u8) !u32 {
     } else {
         return constant.DEFAULT_BACKGROUND_COLOR;
     }
+}
+
+fn audio_mute_argument(args: [][*:0]u8) bool {
+    for (args) |argument| {
+        const cast_argument = std.mem.span(argument);
+
+        if (std.mem.eql(u8, cast_argument, AUDIO_MUTE_NAME)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 fn named_argument(name: []const u8, args: [][*:0]u8) !?[*:0]u8 {
