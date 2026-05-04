@@ -13,8 +13,6 @@ pub const CLOCK_SPEED = 500;
 
 pub const KEYPAD_SIZE = 16;
 
-const NS_PER_US = 1000;
-const NS_PER_MS = 1000 * NS_PER_US;
-pub const NS_PER_S = 1000 * NS_PER_MS;
+pub const MS_PER_S = 1000;
 
 pub const DEFAULT_ADDRESS = "0.0.0.0";

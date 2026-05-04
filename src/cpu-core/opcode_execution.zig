@@ -212,7 +212,7 @@ pub fn op_bnnn(cpu: *Chip8) void {
 pub fn op_cxnn(cpu: *Chip8) void {
     const nn = nn_value(cpu);
     const x = x_value(cpu);
-    cpu.registers[x] = random_number() & nn;
+    cpu.registers[x] = random_number(cpu.io) & nn;
 
     next(cpu);
 }
@@ -410,8 +410,9 @@ fn skip(cpu: *Chip8) void {
     cpu.program_counter += 4;
 }
 
-fn random_number() u8 {
-    const timestamp = @as(u64, @bitCast(std.time.milliTimestamp()));
+fn random_number(io: std.Io) u8 {
+    const test123 = std.Io.Clock.real.now(io).toMilliseconds();
+    const timestamp = @as(u64, @bitCast(test123));
     var prng = std.Random.DefaultPrng.init(timestamp);
 
     const rand = prng.random();

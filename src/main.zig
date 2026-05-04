@@ -13,15 +13,21 @@ const Subsystems = utility_core.Subsystems;
 const InputEvent = utility_core.InputEvent;
 const log = std.log;
 
-const SLEEP_TIME = constant.NS_PER_S / constant.CLOCK_SPEED;
+const SLEEP_TIME = constant.MS_PER_S / constant.CLOCK_SPEED;
 
-pub fn main() !void {
-    const config = try arguments.config();
+pub fn main(init: std.process.Init) !void {
+    const gpa = init.gpa;
+    const io = init.io;
+
+    const args = try init.minimal.args.toSlice(gpa);
+    defer gpa.free(args);
+
+    const config = try arguments.config(args);
 
     const subsystems = try Subsystems.new();
     defer subsystems.quit();
 
-    var cpu = Chip8.new();
+    var cpu = Chip8.new(gpa, io);
     try cpu.load(config.file_path);
 
     const display = try Display.new(config.display_config);
@@ -45,7 +51,7 @@ pub fn main() !void {
             audio.play();
         }
 
-        std.Thread.sleep(SLEEP_TIME);
+        try io.sleep(.fromMilliseconds(SLEEP_TIME), .awake);
     }
 }
 

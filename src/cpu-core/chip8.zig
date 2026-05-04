@@ -14,6 +14,8 @@ const DISPLAY_WIDTH = constant.INTERNAL_DISPLAY_WIDTH;
 const VRAM_SIZE = constant.VRAM_SIZE;
 
 pub const Chip8 = struct {
+    allocator: std.mem.Allocator,
+    io: std.Io,
     opcode: u16,
     memory: [MEMORY_SIZE]u8,
     registers: [REGISTER_SIZE]u8,
@@ -28,10 +30,12 @@ pub const Chip8 = struct {
     should_draw: bool,
     should_play_sound: bool,
 
-    pub fn new() Chip8 {
+    pub fn new(allocator: std.mem.Allocator, io: std.Io) Chip8 {
         log.info("New Chip8 CPU initialized!", .{});
 
         return Chip8{
+            .allocator = allocator,
+            .io = io,
             .opcode = 0,
             .memory = font_set ++ std.mem.zeroes([MEMORY_SIZE - font_set.len]u8),
             .registers = std.mem.zeroes([REGISTER_SIZE]u8),
@@ -49,19 +53,14 @@ pub const Chip8 = struct {
     }
 
     pub fn load(self: *Chip8, path: []u8) !void {
-        var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-        defer _ = gpa.deinit();
-
-        const allocator = gpa.allocator();
-
         errdefer {
             log.warn("Failed to load file at path: {s}", .{path});
         }
 
         log.info("Trying to load file at path: {s}", .{path});
 
-        const data = try cartridge.file_data(path, allocator);
-        defer allocator.free(data);
+        const data = try cartridge.file_data(path, self.allocator, self.io);
+        defer self.allocator.free(data);
 
         for (data, 0..data.len) |value, index| {
             self.memory[index + 512] = value;

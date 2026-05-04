@@ -1,7 +1,4 @@
-pub const sdl = @cImport({
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_main.h");
-});
+pub const sdl = @import("sdl3");
 
 const window_mod = @import("window.zig");
 pub const Window = window_mod.Window;

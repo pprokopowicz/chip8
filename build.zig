@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) !void {
 
     const exe = executable_compile(b, target, optimize);
 
-    try link_sdl(sdl);
+    // try link_sdl(sdl);
 
     cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
@@ -112,10 +112,23 @@ fn audio_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *
 }
 
 fn sdl_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
+    const sdl3 = b.addTranslateC(.{
+        .root_source_file = b.path("src/sdl3.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+    sdl3.linkSystemLibrary("SDL3", .{ .needed = true });
+
     return b.addModule(sdl_name, .{
         .root_source_file = b.path("src/sdl/sdl.zig"),
         .target = target,
         .optimize = optimize,
+        .imports = &.{
+            .{
+                .name = "sdl3",
+                .module = sdl3.createModule(),
+            },
+        },
     });
 }
 
