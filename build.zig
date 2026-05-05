@@ -32,8 +32,6 @@ pub fn build(b: *std.Build) !void {
 
     const exe = executable_compile(b, target, optimize);
 
-    // try link_sdl(sdl);
-
     cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
     audio.addImport(sdl_name, sdl);
@@ -142,10 +140,6 @@ fn executable_compile(b: *std.Build, target: ResolvedTarget, optimize: OptimizeM
             .link_libc = true,
         }),
     });
-}
-
-fn link_sdl(module: *Module) !void {
-    module.linkSystemLibrary("SDL3", .{ .needed = true });
 }
 
 fn add_run_step(b: *std.Build, exe: *Compile) void {
