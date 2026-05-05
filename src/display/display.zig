@@ -8,6 +8,7 @@ const TEXTURE_WIDTH = constant.INTERNAL_DISPLAY_WIDTH;
 const TEXTURE_HEIGHT = constant.INTERNAL_DISPLAY_HEIGHT;
 
 const DisplayError = @import("display_error.zig").DisplayError;
+const RenderError = @import("display_error.zig").RenderError;
 pub const DisplayConfig = @import("display_config.zig").DisplayConfig;
 
 pub const Display = struct {
@@ -78,28 +79,49 @@ pub const Display = struct {
 
     pub fn quit(self: Display) void {
         sdl.destroy_texture(self.texture);
-        sdl.destroy_texture(self.texture);
+        sdl.destroy_renderer(self.renderer);
         sdl.destroy_window(self.window);
     }
 
-    pub fn render(self: Display, vram: []u1) void {
-        _ = sdl.render_clear(self.renderer);
+    pub fn render(self: Display, vram: []u1) !void {
+        const is_clear_success = sdl.render_clear(self.renderer);
+        if (!is_clear_success) {
+            const err = sdl.get_error();
+            log.warn("Failed to clear renderer with error: {s}", .{err});
+            return RenderError.FailedToClearRenderer;
+        }
 
-        self.buildTexture(vram);
+        try self.buildTexture(vram);
 
         const width: f32 = @floatFromInt(self.config.width);
         const height: f32 = @floatFromInt(self.config.height);
         var dest = sdl.FloatRect{ .x = 0, .y = 0, .w = width, .h = height };
 
-        _ = sdl.render_texture(self.renderer, self.texture, null, &dest);
-        _ = sdl.render_present(self.renderer);
+        const is_render_success = sdl.render_texture(self.renderer, self.texture, null, &dest);
+        if (!is_render_success) {
+            const err = sdl.get_error();
+            log.warn("Failed to render texture with error: {s}", .{err});
+            return RenderError.FailedToRenderTexture;
+        }
+
+        const is_present_success = sdl.render_present(self.renderer);
+        if (!is_present_success) {
+            const err = sdl.get_error();
+            log.warn("Failed to present renderer with error: {s}", .{err});
+            return RenderError.FailedToPresentRenderer;
+        }
     }
 
-    fn buildTexture(self: Display, vram: []u1) void {
+    fn buildTexture(self: Display, vram: []u1) !void {
         var pixels: ?[*]u32 = null;
         var pitch: u32 = 0;
 
-        _ = sdl.lock_texture(self.texture, null, &pixels, &pitch);
+        const is_success = sdl.lock_texture(self.texture, null, &pixels, &pitch);
+        if (!is_success) {
+            const err = sdl.get_error();
+            log.warn("Failed to lock texture with error: {s}", .{err});
+            return RenderError.FailedToLockTexture;
+        }
 
         var y: usize = 0;
         while (y < TEXTURE_HEIGHT) : (y += 1) {

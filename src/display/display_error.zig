@@ -4,3 +4,10 @@ pub const DisplayError = error{
     FailedToCreateRenderer,
     FailedToCreateTexture,
 };
+
+pub const RenderError = error{
+    FailedToLockTexture,
+    FailedToClearRenderer,
+    FailedToRenderTexture,
+    FailedToPresentRenderer,
+};

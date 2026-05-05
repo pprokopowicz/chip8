@@ -44,7 +44,7 @@ pub fn main(init: std.process.Init) !void {
         parse_event(&cpu.keypad, &quit);
 
         if (cpu.should_draw) {
-            display.render(&cpu.vram);
+            try display.render(&cpu.vram);
         }
 
         if (cpu.should_play_sound) {
