@@ -1,4 +1,4 @@
-pub const sdl = @import("sdl3");
+pub const sdl = @import("SDL3");
 
 const window_mod = @import("window.zig");
 pub const Window = window_mod.Window;

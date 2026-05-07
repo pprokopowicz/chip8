@@ -4,30 +4,43 @@ const ResolvedTarget = std.Build.ResolvedTarget;
 const OptimizeMode = std.builtin.OptimizeMode;
 const Compile = std.Build.Step.Compile;
 
-const BuildError = error{
-    UnavailablePlatform,
-};
-
 const constant_name = "constant";
+const constant_path = "src/constant/constant.zig";
+
 const cpu_core_name = "cpu-core";
+const cpu_core_path = "src/cpu-core/chip8.zig";
+
 const cartridge_name = "cartridge";
+const cartridge_path = "src/cartridge/cartridge.zig";
+
 const display_name = "display";
+const display_path = "src/display/display.zig";
+
 const utility_name = "utility";
+const utility_path = "src/utility/root.zig";
+
 const keypad_name = "keypad";
+const keypad_path = "src/keypad/keypad.zig";
+
 const audio_name = "audio";
+const audio_path = "src/audio/audio.zig";
+
 const sdl_name = "sdl";
+const sdl3_library_name = "SDL3";
+const sdl_path = "src/sdl/sdl.zig";
+const sdl_header_path = "src/sdl3.h";
 
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const constant = constant_module(b, target, optimize);
-    const cpu_core = cpu_core_module(b, target, optimize);
-    const cartridge = cartridge_module(b, target, optimize);
-    const display = display_module(b, target, optimize);
-    const utility = utility_module(b, target, optimize);
-    const keypad = keypad_module(b, target, optimize);
-    const audio = audio_module(b, target, optimize);
+    const constant = create_module(b, target, optimize, constant_name, constant_path);
+    const cpu_core = create_module(b, target, optimize, cpu_core_name, cpu_core_path);
+    const cartridge = create_module(b, target, optimize, cartridge_name, cartridge_path);
+    const display = create_module(b, target, optimize, display_name, display_path);
+    const utility = create_module(b, target, optimize, utility_name, utility_path);
+    const keypad = create_module(b, target, optimize, keypad_name, keypad_path);
+    const audio = create_module(b, target, optimize, audio_name, audio_path);
     const sdl = sdl_module(b, target, optimize);
 
     const exe = executable_compile(b, target, optimize);
@@ -53,57 +66,15 @@ pub fn build(b: *std.Build) !void {
     add_run_step(b, exe);
 }
 
-fn constant_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(constant_name, .{
-        .root_source_file = b.path("src/constant/constant.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-}
-
-fn cpu_core_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(cpu_core_name, .{
-        .root_source_file = b.path("src/cpu-core/chip8.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-}
-
-fn cartridge_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(cartridge_name, .{
-        .root_source_file = b.path("src/cartridge/cartridge.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-}
-
-fn display_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(display_name, .{
-        .root_source_file = b.path("src/display/display.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-}
-
-fn utility_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(utility_name, .{
-        .root_source_file = b.path("src/utility/root.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-}
-
-fn keypad_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(keypad_name, .{
-        .root_source_file = b.path("src/keypad/keypad.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-}
-
-fn audio_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
-    return b.addModule(audio_name, .{
-        .root_source_file = b.path("src/audio/audio.zig"),
+fn create_module(
+    b: *std.Build,
+    target: ResolvedTarget,
+    optimize: OptimizeMode,
+    name: []const u8,
+    root_source_file: []const u8,
+) *Module {
+    return b.addModule(name, .{
+        .root_source_file = b.path(root_source_file),
         .target = target,
         .optimize = optimize,
     });
@@ -111,19 +82,19 @@ fn audio_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *
 
 fn sdl_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
     const sdl3 = b.addTranslateC(.{
-        .root_source_file = b.path("src/sdl3.h"),
+        .root_source_file = b.path(sdl_header_path),
         .target = target,
         .optimize = optimize,
     });
-    sdl3.linkSystemLibrary("SDL3", .{ .needed = true });
+    sdl3.linkSystemLibrary(sdl3_library_name, .{ .needed = true });
 
     return b.addModule(sdl_name, .{
-        .root_source_file = b.path("src/sdl/sdl.zig"),
+        .root_source_file = b.path(sdl_path),
         .target = target,
         .optimize = optimize,
         .imports = &.{
             .{
-                .name = "sdl3",
+                .name = sdl3_library_name,
                 .module = sdl3.createModule(),
             },
         },
