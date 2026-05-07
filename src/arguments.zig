@@ -37,11 +37,11 @@ pub fn config(args: Args) !Config {
         log.info("\t\t{s}", .{arg});
     }
 
-    const file_path = try file_path_argument(args);
-    const display_scale = try display_scale_argument(args);
-    const foreground_color = try foreground_color_argument(args);
-    const background_color = try background_color_argument(args);
-    const is_audio_muted = audio_mute_argument(args);
+    const file_path = try filePathArgument(args);
+    const display_scale = try displayScaleArgument(args);
+    const foreground_color = try foregroundColorArgument(args);
+    const background_color = try backgroundColorArgument(args);
+    const is_audio_muted = audioMuteArgument(args);
 
     const display_config = DisplayConfig.new(
         display_scale,
@@ -58,8 +58,8 @@ pub fn config(args: Args) !Config {
     );
 }
 
-fn file_path_argument(args: Args) ![]u8 {
-    const file_path = try named_argument(FILE_PATH_NAME, args);
+fn filePathArgument(args: Args) ![]u8 {
+    const file_path = try namedArgument(FILE_PATH_NAME, args);
 
     if (file_path) |path| {
         const slice: []u8 = @constCast(path);
@@ -69,40 +69,40 @@ fn file_path_argument(args: Args) ![]u8 {
     }
 }
 
-fn display_scale_argument(args: Args) !u32 {
-    const scale_argument = try named_argument(DISPLAY_SCALE_NAME, args);
+fn displayScaleArgument(args: Args) !u32 {
+    const scale_argument = try namedArgument(DISPLAY_SCALE_NAME, args);
 
     if (scale_argument) |scale| {
-        const scale_int = try int_from_string(u32, scale, 10);
+        const scale_int = try intFromString(u32, scale, 10);
         return scale_int;
     } else {
         return constant.DEFAULT_DISPLAY_SCALE;
     }
 }
 
-fn foreground_color_argument(args: Args) !u32 {
-    const foreground_argument = try named_argument(FOREGROUND_NAME, args);
+fn foregroundColorArgument(args: Args) !u32 {
+    const foreground_argument = try namedArgument(FOREGROUND_NAME, args);
 
     if (foreground_argument) |foreground| {
-        const foreground_int = try int_from_string(u32, foreground, 16);
-        return add_alpha(foreground_int);
+        const foreground_int = try intFromString(u32, foreground, 16);
+        return addAlpha(foreground_int);
     } else {
         return constant.DEFAULT_FOREGROUND_COLOR;
     }
 }
 
-fn background_color_argument(args: Args) !u32 {
-    const background_argument = try named_argument(BACKGROUND_NAME, args);
+fn backgroundColorArgument(args: Args) !u32 {
+    const background_argument = try namedArgument(BACKGROUND_NAME, args);
 
     if (background_argument) |background| {
-        const background_int = try int_from_string(u32, background, 16);
-        return add_alpha(background_int);
+        const background_int = try intFromString(u32, background, 16);
+        return addAlpha(background_int);
     } else {
         return constant.DEFAULT_BACKGROUND_COLOR;
     }
 }
 
-fn audio_mute_argument(args: Args) bool {
+fn audioMuteArgument(args: Args) bool {
     for (args) |arg| {
         if (std.mem.eql(u8, arg, AUDIO_MUTE_NAME)) {
             return true;
@@ -112,7 +112,7 @@ fn audio_mute_argument(args: Args) bool {
     return false;
 }
 
-fn named_argument(name: []const u8, args: Args) !?[:0]const u8 {
+fn namedArgument(name: []const u8, args: Args) !?[:0]const u8 {
     var value_index: ?usize = null;
     for (args, 0..) |arg, index| {
         if (std.mem.eql(u8, arg, name)) {
@@ -131,11 +131,11 @@ fn named_argument(name: []const u8, args: Args) !?[:0]const u8 {
     return null;
 }
 
-fn add_alpha(color: u32) u32 {
+fn addAlpha(color: u32) u32 {
     return (color << 8) + 0xFF;
 }
 
-fn int_from_string(T: type, buf: [:0]const u8, base: u8) !T {
+fn intFromString(T: type, buf: [:0]const u8, base: u8) !T {
     const int_value = try std.fmt.parseInt(T, buf, base);
     return int_value;
 }

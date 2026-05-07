@@ -5,24 +5,24 @@ const sdl = @import("sdl");
 
 const KEYPAD_SIZE = constant.KEYPAD_SIZE;
 
-pub fn parse_key_down(key_code: u32, keypad: *[KEYPAD_SIZE]u1) void {
-    const index_optional = index_from_key_code(key_code);
+pub fn parseKeyDown(key_code: u32, keypad: *[KEYPAD_SIZE]u1) void {
+    const index_optional = indexFromKeyCode(key_code);
 
     if (index_optional) |index| {
         keypad[index] = 1;
     }
 }
 
-pub fn parse_key_up(key_code: u32, keypad: *[KEYPAD_SIZE]u1) void {
-    const index_optional = index_from_key_code(key_code);
+pub fn parseKeyUp(key_code: u32, keypad: *[KEYPAD_SIZE]u1) void {
+    const index_optional = indexFromKeyCode(key_code);
 
     if (index_optional) |index| {
         keypad[index] = 0;
     }
 }
 
-fn index_from_key_code(key_code: u32) ?usize {
-    const scan_code = sdl.scan_code_from(key_code);
+fn indexFromKeyCode(key_code: u32) ?usize {
+    const scan_code = sdl.scanCodeFrom(key_code);
 
     return switch (scan_code) {
         sdl.ScanCode.x => 0,

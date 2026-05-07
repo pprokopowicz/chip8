@@ -34,16 +34,16 @@ pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const constant = create_module(b, target, optimize, constant_name, constant_path);
-    const cpu_core = create_module(b, target, optimize, cpu_core_name, cpu_core_path);
-    const cartridge = create_module(b, target, optimize, cartridge_name, cartridge_path);
-    const display = create_module(b, target, optimize, display_name, display_path);
-    const utility = create_module(b, target, optimize, utility_name, utility_path);
-    const keypad = create_module(b, target, optimize, keypad_name, keypad_path);
-    const audio = create_module(b, target, optimize, audio_name, audio_path);
-    const sdl = sdl_module(b, target, optimize);
+    const constant = createModule(b, target, optimize, constant_name, constant_path);
+    const cpu_core = createModule(b, target, optimize, cpu_core_name, cpu_core_path);
+    const cartridge = createModule(b, target, optimize, cartridge_name, cartridge_path);
+    const display = createModule(b, target, optimize, display_name, display_path);
+    const utility = createModule(b, target, optimize, utility_name, utility_path);
+    const keypad = createModule(b, target, optimize, keypad_name, keypad_path);
+    const audio = createModule(b, target, optimize, audio_name, audio_path);
+    const sdl = sdlModule(b, target, optimize);
 
-    const exe = executable_compile(b, target, optimize);
+    const exe = executableCompile(b, target, optimize);
 
     cpu_core.addImport(constant_name, constant);
     cpu_core.addImport(cartridge_name, cartridge);
@@ -63,10 +63,10 @@ pub fn build(b: *std.Build) !void {
 
     b.installArtifact(exe);
 
-    add_run_step(b, exe);
+    addRunStep(b, exe);
 }
 
-fn create_module(
+fn createModule(
     b: *std.Build,
     target: ResolvedTarget,
     optimize: OptimizeMode,
@@ -80,7 +80,7 @@ fn create_module(
     });
 }
 
-fn sdl_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
+fn sdlModule(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Module {
     const sdl3 = b.addTranslateC(.{
         .root_source_file = b.path(sdl_header_path),
         .target = target,
@@ -101,7 +101,7 @@ fn sdl_module(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Mo
     });
 }
 
-fn executable_compile(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Compile {
+fn executableCompile(b: *std.Build, target: ResolvedTarget, optimize: OptimizeMode) *Compile {
     return b.addExecutable(.{
         .name = "chip8",
         .root_module = b.createModule(.{
@@ -113,7 +113,7 @@ fn executable_compile(b: *std.Build, target: ResolvedTarget, optimize: OptimizeM
     });
 }
 
-fn add_run_step(b: *std.Build, exe: *Compile) void {
+fn addRunStep(b: *std.Build, exe: *Compile) void {
     const run_exe = b.addRunArtifact(exe);
 
     if (b.args) |args| {

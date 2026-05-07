@@ -1,7 +1,7 @@
 const std = @import("std");
 const log = std.log;
 
-pub fn file_data(file_path: []u8, allocator: std.mem.Allocator, io: std.Io) ![]u8 {
+pub fn fileData(file_path: []u8, allocator: std.mem.Allocator, io: std.Io) ![]u8 {
     errdefer log.warn("Failed to load file data at path: {s}", .{file_path});
 
     var file = try std.Io.Dir.cwd().openFile(io, file_path, .{});

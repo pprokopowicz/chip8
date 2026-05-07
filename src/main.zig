@@ -39,9 +39,9 @@ pub fn main(init: std.process.Init) !void {
     var quit = false;
 
     while (!quit) {
-        cpu.emulate_cycle();
+        cpu.emulateCycle();
 
-        parse_event(&cpu.keypad, &quit);
+        parseEvent(&cpu.keypad, &quit);
 
         if (cpu.should_draw) {
             try display.render(&cpu.vram);
@@ -55,19 +55,19 @@ pub fn main(init: std.process.Init) !void {
     }
 }
 
-fn parse_event(keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {
+fn parseEvent(keypad: *[constant.KEYPAD_SIZE]u1, quit: *bool) void {
     var event: InputEvent = InputEvent.none;
-    utility_core.parse_event(&event);
+    utility_core.parseEvent(&event);
 
     switch (event) {
         .quit => quit.* = true,
-        .key_down => |key_code| keypad_core.parse_key_down(key_code, keypad),
-        .key_up => |key_code| keypad_core.parse_key_up(key_code, keypad),
+        .key_down => |key_code| keypad_core.parseKeyDown(key_code, keypad),
+        .key_up => |key_code| keypad_core.parseKeyUp(key_code, keypad),
         .none => {},
     }
 }
 
-fn debug_render(cpu: Chip8) void {
+fn debugRender(cpu: Chip8) void {
     var y: usize = 0;
 
     while (y < constant.INTERNAL_DISPLAY_HEIGHT) : (y += 1) {

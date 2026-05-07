@@ -7,7 +7,7 @@ pub const Event = struct {
     scan_code: ScanCode,
 };
 
-pub fn poll_event(event: *Event) bool {
+pub fn pollEvent(event: *Event) bool {
     var sdl_event: sdl.SDL_Event = undefined;
     const return_val = sdl.SDL_PollEvent(&sdl_event);
 

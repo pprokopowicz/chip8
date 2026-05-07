@@ -9,7 +9,7 @@ pub const Subsystems = struct {
     pub fn new() !Subsystems {
         const flags = [_]sdl.Init{ .audio, .video };
         if (!sdl.init(&flags)) {
-            const err = sdl.get_error();
+            const err = sdl.getError();
             log.warn("Failed to initialize subsystems with error: {s}", .{err});
             return SubsystemError.FailedToInitialize;
         }

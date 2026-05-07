@@ -18,16 +18,16 @@ pub const Display = struct {
     texture: ?*sdl.Texture,
 
     pub fn new(config: DisplayConfig) !Display {
-        sdl.set_main_ready();
+        sdl.setMainReady();
 
-        const window = try new_window(config);
-        errdefer sdl.destroy_window(window);
+        const window = try newWindow(config);
+        errdefer sdl.destroyWindow(window);
 
-        const renderer = try new_renderer(window);
-        errdefer sdl.destroy_renderer(renderer);
+        const renderer = try newRenderer(window);
+        errdefer sdl.destroyRenderer(renderer);
 
-        const texture = try new_texture(renderer);
-        errdefer sdl.destroy_texture(texture);
+        const texture = try newTexture(renderer);
+        errdefer sdl.destroyTexture(texture);
 
         log.info("New Display initialized!", .{});
 
@@ -39,11 +39,11 @@ pub const Display = struct {
         };
     }
 
-    fn new_window(config: DisplayConfig) !?*sdl.Window {
-        const window = sdl.create_window(WINDOW_NAME, config.width, config.height, 0);
+    fn newWindow(config: DisplayConfig) !?*sdl.Window {
+        const window = sdl.createWindow(WINDOW_NAME, config.width, config.height, 0);
 
         if (window == null) {
-            const err = sdl.get_error();
+            const err = sdl.getError();
             log.warn("Failed to create window with error: {s}", .{err});
             return DisplayError.FailedToCreateWindow;
         }
@@ -51,11 +51,11 @@ pub const Display = struct {
         return window;
     }
 
-    fn new_renderer(window: ?*sdl.Window) !?*sdl.Renderer {
-        const renderer = sdl.create_renderer(window, null);
+    fn newRenderer(window: ?*sdl.Window) !?*sdl.Renderer {
+        const renderer = sdl.createRenderer(window, null);
 
         if (renderer == null) {
-            const err = sdl.get_error();
+            const err = sdl.getError();
             log.warn("Failed to create renderer with error: {s}", .{err});
             return DisplayError.FailedToCreateRenderer;
         }
@@ -63,30 +63,30 @@ pub const Display = struct {
         return renderer;
     }
 
-    fn new_texture(renderer: ?*sdl.Renderer) ![*c]sdl.Texture {
-        const texture = sdl.create_texture(renderer, sdl.PixelFormat.rgba8888, sdl.TextureAccess.streaming, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+    fn newTexture(renderer: ?*sdl.Renderer) ![*c]sdl.Texture {
+        const texture = sdl.createTexture(renderer, sdl.PixelFormat.rgba8888, sdl.TextureAccess.streaming, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
         if (texture == null) {
-            const err = sdl.get_error();
+            const err = sdl.getError();
             log.warn("Failed to create texture with error: {s}", .{err});
             return DisplayError.FailedToCreateTexture;
         }
 
-        _ = sdl.set_texture_scale_mode(texture, sdl.ScaleMode.nearest);
+        _ = sdl.setTextureScaleMode(texture, sdl.ScaleMode.nearest);
 
         return texture;
     }
 
     pub fn quit(self: Display) void {
-        sdl.destroy_texture(self.texture);
-        sdl.destroy_renderer(self.renderer);
-        sdl.destroy_window(self.window);
+        sdl.destroyTexture(self.texture);
+        sdl.destroyRenderer(self.renderer);
+        sdl.destroyWindow(self.window);
     }
 
     pub fn render(self: Display, vram: []u1) !void {
-        const is_clear_success = sdl.render_clear(self.renderer);
+        const is_clear_success = sdl.renderClear(self.renderer);
         if (!is_clear_success) {
-            const err = sdl.get_error();
+            const err = sdl.getError();
             log.warn("Failed to clear renderer with error: {s}", .{err});
             return RenderError.FailedToClearRenderer;
         }
@@ -97,16 +97,16 @@ pub const Display = struct {
         const height: f32 = @floatFromInt(self.config.height);
         var dest = sdl.FloatRect{ .x = 0, .y = 0, .w = width, .h = height };
 
-        const is_render_success = sdl.render_texture(self.renderer, self.texture, null, &dest);
+        const is_render_success = sdl.renderTexture(self.renderer, self.texture, null, &dest);
         if (!is_render_success) {
-            const err = sdl.get_error();
+            const err = sdl.getError();
             log.warn("Failed to render texture with error: {s}", .{err});
             return RenderError.FailedToRenderTexture;
         }
 
-        const is_present_success = sdl.render_present(self.renderer);
+        const is_present_success = sdl.renderPresent(self.renderer);
         if (!is_present_success) {
-            const err = sdl.get_error();
+            const err = sdl.getError();
             log.warn("Failed to present renderer with error: {s}", .{err});
             return RenderError.FailedToPresentRenderer;
         }
@@ -116,9 +116,9 @@ pub const Display = struct {
         var pixels: ?[*]u32 = null;
         var pitch: u32 = 0;
 
-        const is_success = sdl.lock_texture(self.texture, null, &pixels, &pitch);
+        const is_success = sdl.lockTexture(self.texture, null, &pixels, &pitch);
         if (!is_success) {
-            const err = sdl.get_error();
+            const err = sdl.getError();
             log.warn("Failed to lock texture with error: {s}", .{err});
             return RenderError.FailedToLockTexture;
         }
@@ -134,6 +134,6 @@ pub const Display = struct {
                 }
             }
         }
-        sdl.unlock_texture(self.texture);
+        sdl.unlockTexture(self.texture);
     }
 };
